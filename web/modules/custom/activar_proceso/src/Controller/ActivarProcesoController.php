@@ -94,7 +94,7 @@ class ActivarProcesoController extends ControllerBase implements ProcesosInterfa
         $usuarioGestor = $this->getNombreUsuario($responsableGestorEntity[0]);
       }
 
-      // 2. RESPONSABLE DE LA ACTIVIDAD
+      // 2. RESPONSABLE DE LA ACTIVIDAD (Oficina gestora / academia)
       $mailResponsableAct = '';
       $usuarioAcademia = '';
       if (!$proceso->field_proceso_responsable_academ->isEmpty()) {
@@ -102,6 +102,68 @@ class ActivarProcesoController extends ControllerBase implements ProcesosInterfa
         $mailResponsableAct = $responsableAcademiaEntity[0]->getEmail();
         $usuarioAcademia = $this->getNombreUsuario($responsableAcademiaEntity[0]);
       }
+
+      // DATOS DE LA PRIMERA ACTIVIDAD
+      $actividades = $proceso->field_proceso_actividades->referencedEntities();
+      $primeraActividad = !empty($actividades) ? reset($actividades) : NULL;
+
+      $nombre_actividad = $primeraActividad ? $primeraActividad->getTitle() : '';
+      $responsable_actividad = '';
+      $rol_responsable = '';
+      $fecha_inicio = '';
+      $fecha_final = '';
+      $entrada = '';
+      $salida = '';
+      $observaciones = '';
+
+      if ($primeraActividad) {
+        if ($primeraActividad->hasField('field_act_procesos_responsable') && !$primeraActividad->get('field_act_procesos_responsable')->isEmpty()) {
+          $resp_entities = $primeraActividad->get('field_act_procesos_responsable')->referencedEntities();
+          if (!empty($resp_entities)) {
+            $responsable_actividad = $this->getNombreUsuario(reset($resp_entities));
+          }
+        }
+        if ($primeraActividad->hasField('field_act_procesos_rol_responsab') && !$primeraActividad->get('field_act_procesos_rol_responsab')->isEmpty()) {
+          $rol_entities = $primeraActividad->get('field_act_procesos_rol_responsab')->referencedEntities();
+          if (!empty($rol_entities)) {
+            $rol_responsable = reset($rol_entities)->label();
+          } else {
+            $rol_responsable = $primeraActividad->get('field_act_procesos_rol_responsab')->value;
+          }
+        }
+        if ($primeraActividad->hasField('field_act_procesos_fecha_inicio') && !$primeraActividad->get('field_act_procesos_fecha_inicio')->isEmpty()) {
+          $fecha_inicio = $primeraActividad->get('field_act_procesos_fecha_inicio')->value;
+        }
+        if ($primeraActividad->hasField('field_act_procesos_fecha_final') && !$primeraActividad->get('field_act_procesos_fecha_final')->isEmpty()) {
+          $fecha_final = $primeraActividad->get('field_act_procesos_fecha_final')->value;
+        }
+        if ($primeraActividad->hasField('field_act_procesos_entradas') && !$primeraActividad->get('field_act_procesos_entradas')->isEmpty()) {
+          $entrada = $primeraActividad->get('field_act_procesos_entradas')->value;
+        }
+        if ($primeraActividad->hasField('field_act_procesos_salidad') && !$primeraActividad->get('field_act_procesos_salidad')->isEmpty()) {
+          $salida = $primeraActividad->get('field_act_procesos_salidad')->value;
+        }
+        if ($primeraActividad->hasField('field_act_procesos_observaciones') && !$primeraActividad->get('field_act_procesos_observaciones')->isEmpty()) {
+          $observaciones = $primeraActividad->get('field_act_procesos_observaciones')->value;
+        }
+      }
+
+      $replacements = [
+        '{PROCESO}' => $nombre_proceso,
+        '{PROGRAMA}' => $nombre_programa,
+        '{RESPONSABLE_ACADEMIA}' => $usuarioAcademia,
+        '{RESPONSABLE_ACTIVIDAD}' => $responsable_actividad,
+        '{ROL_RESPONSABLE}' => $rol_responsable,
+        '{NOMBRE_ACTIVIDAD}' => $nombre_actividad,
+        '{FECHA_INICIO}' => $fecha_inicio,
+        '{FECHA_FINAL}' => $fecha_final,
+        '{ENTRADA}' => $entrada,
+        '{SALIDA}' => $salida,
+        '{OBSERVACIONES}' => $observaciones,
+        '@usuario' => $usuarioGestor,
+        '@link' => $link,
+        '@responsable' => $mailResponsableAct,
+      ];
 
       // ENVÍO AL RESPONSABLE DEL PROCESO
       if (filter_var($mailResponsableProc, FILTER_VALIDATE_EMAIL)) {
@@ -112,14 +174,8 @@ class ActivarProcesoController extends ControllerBase implements ProcesosInterfa
 
         if ($tipo_notificacion_proc === 'personalizado' && $proceso->hasField('field_correo_proceso') && !$proceso->get('field_correo_proceso')->isEmpty()) {
           $messageIn = $proceso->get('field_correo_proceso')->value;
-          $replacements = [
-            '{PROCESO}' => $nombre_proceso,
-            '{PROGRAMA}' => $nombre_programa,
-            '@usuario' => $usuarioGestor,
-            '@link' => $link,
-            '@responsable' => $mailResponsableAct,
-          ];
-          $messageOut = Markup::create(str_replace(array_keys($replacements), array_values($replacements), $messageIn));
+          $procReplacements = array_merge($replacements, ['@usuario' => $usuarioGestor, '@responsable' => $mailResponsableAct]);
+          $messageOut = Markup::create(str_replace(array_keys($procReplacements), array_values($procReplacements), $messageIn));
         } else {
           $messageIn = '<div class="wrapper-mail">
             <p>Señor(a) <strong>@usuario :</strong></p>
@@ -143,14 +199,8 @@ class ActivarProcesoController extends ControllerBase implements ProcesosInterfa
 
         if ($tipo_notificacion_act === 'personalizado' && $proceso->hasField('field_correo_actividad') && !$proceso->get('field_correo_actividad')->isEmpty()) {
           $messageIn = $proceso->get('field_correo_actividad')->value;
-          $replacements = [
-            '{PROCESO}' => $nombre_proceso,
-            '{PROGRAMA}' => $nombre_programa,
-            '@usuario' => $usuarioAcademia,
-            '@link' => $link,
-            '@responsable' => $mailResponsableProc,
-          ];
-          $messageOut = Markup::create(str_replace(array_keys($replacements), array_values($replacements), $messageIn));
+          $actReplacements = array_merge($replacements, ['@usuario' => $usuarioAcademia, '@responsable' => $mailResponsableProc]);
+          $messageOut = Markup::create(str_replace(array_keys($actReplacements), array_values($actReplacements), $messageIn));
         } else {
           $messageIn = '<div class="wrapper-mail">
             <p>Señor(a) <strong>@usuario :</strong></p>
