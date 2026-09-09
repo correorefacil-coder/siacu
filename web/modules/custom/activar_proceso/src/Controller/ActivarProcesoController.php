@@ -57,31 +57,56 @@ class ActivarProcesoController extends ControllerBase implements ProcesosInterfa
 
   private function activaProceso(NodeInterface $proceso){
 
-    $estado = $this->getEstadoProceso($proceso);
+      $estado = $this->getEstadoProceso($proceso);
 
     if ($estado == Self::INICIADO) {
 
       \Drupal::messenger()->addStatus('El Proceso ha sido activado exitosamente.');
-      $messageIn = '<div class="wrapper-mail">
-        <p>
-          Señor(a) <strong>@usuario :</strong>
-        </p>
-        <p>Reciba un cordial saludo</p>
-        <p>
-          El plan de trabajo <strong>@link</strong> se encuentra disponible para
-          su revisión y actualización de las actividades que este proceso conlleva.
-        </p>
-        <p>
-          Una vez finalizado el plan de trabajo por favor enviarlo a la Dirección
-          de Calidad y Proyectos Académicos (DCPA) por medio de la opción
-          "Enviar plan de trabajo a DCPA" del sistema para su aprobación final.
-        </p>
-        <p>
-          Si tiene dudas comuníquese con el responsable de la oficina gestora:
-          @responsable
-        </p>
-      </div>';
+      
+      // Determinar si se usa notificación personalizada
+      $tipo_notificacion = 'automatico';
+      if ($proceso->hasField('field_tipo_notificacion') && !$proceso->get('field_tipo_notificacion')->isEmpty()) {
+        $tipo_notificacion = $proceso->get('field_tipo_notificacion')->value;
+      }
 
+      if ($tipo_notificacion === 'personalizado' && $proceso->hasField('field_correo_personalizado') && !$proceso->get('field_correo_personalizado')->isEmpty()) {
+        $messageIn = $proceso->get('field_correo_personalizado')->value;
+        
+        $nombre_proceso = $proceso->getTitle();
+        $nombre_programa = '';
+        
+        if ($proceso->hasField('field_procesos_pa_existente') && !$proceso->get('field_procesos_pa_existente')->isEmpty()) {
+          $programa_entities = $proceso->get('field_procesos_pa_existente')->referencedEntities();
+          if (!empty($programa_entities)) {
+            $nombre_programa = reset($programa_entities)->label();
+          }
+        } elseif ($proceso->hasField('field_procesos_pa') && !$proceso->get('field_procesos_pa')->isEmpty()) {
+          $programa_entities = $proceso->get('field_procesos_pa')->referencedEntities();
+          if (!empty($programa_entities)) {
+            $nombre_programa = reset($programa_entities)->label();
+          }
+        }
+      } else {
+        $messageIn = '<div class="wrapper-mail">
+          <p>
+            Señor(a) <strong>@usuario :</strong>
+          </p>
+          <p>Reciba un cordial saludo</p>
+          <p>
+            El plan de trabajo <strong>@link</strong> se encuentra disponible para
+            su revisión y actualización de las actividades que este proceso conlleva.
+          </p>
+          <p>
+            Una vez finalizado el plan de trabajo por favor enviarlo a la Dirección
+            de Calidad y Proyectos Académicos (DCPA) por medio de la opción
+            "Enviar plan de trabajo a DCPA" del sistema para su aprobación final.
+          </p>
+          <p>
+            Si tiene dudas comuníquese con el responsable de la oficina gestora:
+            @responsable
+          </p>
+        </div>';
+      }
 
       // USUARIO
       $responsableEntity = $proceso->field_proceso_responsable_academ->referencedEntities();
@@ -122,12 +147,25 @@ class ActivarProcesoController extends ControllerBase implements ProcesosInterfa
       $link = $link->toString();
 
       // ENVIO CORREO
-      $values = array(
-        '@usuario' => $usuario,
-        '@link' => $link,
-        '@responsable' => $responsableAcademiaEntity[0]->getEmail(),
-      );
-      $messageOut = t($messageIn, $values);
+      if ($tipo_notificacion === 'personalizado') {
+        $replacements = [
+          '{PROCESO}' => isset($nombre_proceso) ? $nombre_proceso : '',
+          '{PROGRAMA}' => isset($nombre_programa) ? $nombre_programa : '',
+          '@usuario' => $usuario,
+          '@link' => $link,
+          '@responsable' => $responsableAcademiaEntity[0]->getEmail(),
+        ];
+        $messageOut = str_replace(array_keys($replacements), array_values($replacements), $messageIn);
+        $messageOut = Markup::create($messageOut);
+      } else {
+        $values = array(
+          '@usuario' => $usuario,
+          '@link' => $link,
+          '@responsable' => $responsableAcademiaEntity[0]->getEmail(),
+        );
+        $messageOut = t($messageIn, $values);
+      }
+      
       $this->sendEmail($mailSend, "Proceso Activado", $messageOut, 'correo_activar_proceso');
       $this->setProcesoActivado($proceso);
     }
