@@ -1,0 +1,7 @@
+name: Alertas Estandar y Especiales
+type: module
+description: Modulo Custom para parametrizar Alertas Estandar y Especiales para contenidos Programa Academico
+core_version_requirement: ^9 || ^10
+package: 'Custom'
+dependencies:
+  - node

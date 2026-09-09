@@ -1,0 +1,7 @@
+name: 'Estilos Admin'
+type: module
+description: 'Aplicacion de estilos al modo administativo'
+core_version_requirement: ^9 || ^10
+package: 'Custom'
+dependencies:
+  - node

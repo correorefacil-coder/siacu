@@ -1,0 +1,17 @@
+{
+    "name": "drupal/business_rules",
+    "type": "drupal-module",
+    "description": "Business Rules",
+    "keywords": ["Drupal"],
+    "license": "GPL-2.0+",
+    "homepage": "http://drupal.org/project/business_rules",
+    "minimum-stability": "dev",
+    "support": {
+        "issues": "http://drupal.org/project/issues/business_rules",
+        "source": "http://cgit.drupalcode.org/business_rules"
+    },
+    "require": {
+        "drupal/dbug": "*",
+        "laminas/laminas-diactoros": "*"
+    }
+}

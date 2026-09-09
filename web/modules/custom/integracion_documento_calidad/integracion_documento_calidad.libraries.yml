@@ -1,0 +1,8 @@
+respuestaDrive:
+  version: 1.0
+  js:
+    js/confirmacionRespuestaOffice.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/jquery.once

@@ -1,0 +1,122 @@
+{#
+/**
+ * @file
+ * Default template to format a HTML email using the Mime Mail module.
+ *
+ * Copy this file in your default theme folder to create a custom themed email.
+ * If you modify this template you MUST be sure to keep the html, body, and
+ * header tags. This template should produce a fully-formed HTML document.
+ * Failure to include these will result in a malformed email and possibly
+ * errors shown to the user when sending email.
+ *
+ * To override this template for all emails sent by a given module,
+ * rename this template to mimemail-messages--[module].html.twig.
+ *
+ * To override this template for a specific email sent by a given module,
+ * rename this template to mimemail-messages--[module]--[key].html.twig.
+ *
+ * Available variables:
+ * - attributes: HTML attributes for the body element of the message.
+ * - key: The message identifier.
+ * - module: The machine name of the sending module.
+ * - css: Internal style sheets.
+ * - recipient: The recipient of the message.
+ * - subject: The message subject.
+ * - body: The message body.
+ *
+ * @see template_preprocess_mimemail_message()
+ *
+ * @ingroup themeable
+ */
+#}
+{% set classes = module ? (key ? module ~ '-' ~ key) %}
+<!DOCTYPE html "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1 user-scalable=yes">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+</head>
+<body style="margin:0;padding:0;"{{ attributes.addClass(classes) }}>
+  <table role="presentation" style="width:100%;background:#ffffff;">
+    <tr>
+      <td align="center" style="padding:0;">
+        <table role="presentation" style="width:602px;text-align:left;">
+          <tr>
+            <td>
+              <table role="presentation" style="padding:10px 30px 0px 30px;" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td>
+                    <table role="presentation" class="email-container" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" align="center" style="margin: auto; background-color: #ffffff;" width="600">
+                      <tbody>
+                        <tr>
+                          <td height="50" style="font-size: 1px; line-height: 50px;">&nbsp;</td>
+                        </tr>
+                        <tr>
+                          <td align="center">
+                            <table role="presentation" class="email-container" cellspacing="0" cellpadding="0" border="0" width="500" align="center" style="margin: auto;">
+                              <tbody>
+                                <tr>
+                                  <td>
+                                    <table cellpadding="0" cellspacing="0" border="0" width="100%" align="center" style="margin: auto;">
+                                      <tbody>
+                                        <tr>
+                                          <td align="center">
+                                            <table role="presentation" class="email-container" cellspacing="0" cellpadding="0" border="0" align="left" style="margin: auto;">
+                                              <tbody>
+                                                <tr>
+                                                  <td>
+                                                    <table cellpadding="0" cellspacing="0" border="0" width="100%" align="center" style="margin: auto;">
+                                                      <tbody>
+                                                        <tr>
+                                                          <td style="font-family: 'Objectivity', sans-serif; font-size: 20px; line-height: 32px; color: #0A0187; padding: 0 20px; font-weight: 700; text-align: left;">
+                                                            <p style="margin: 0;padding: 0 20px;">
+                                                                {{subject }}
+                                                            </p>
+                                                          </td>
+                                                        </tr>
+                                                      </tbody>
+                                                    </table>
+                                                  </td>
+                                                </tr>
+                                              </tbody>
+                                            </table>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td height="20" style="font-size: 1px; line-height: 20px;">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                          <td style="font-family: 'Objectivity', sans-serif; font-size: 16px; line-height: 24px; color: #000000; padding: 0 20px; font-weight: 400; text-align: left;">
+                                            <p style="margin: 0;">
+                                              {{ body|raw }}
+                                            </p>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td height="20" style="font-size: 1px; line-height: 20px;">&nbsp;</td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

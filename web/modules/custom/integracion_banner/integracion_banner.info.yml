@@ -1,0 +1,5 @@
+name: Integracion Banner Uninorte
+type: module
+description: Integracion con Banner Uninorte
+package: Custom
+core_version_requirement: ^9 || ^10

@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * @file
+ * Contains all_extensions.module.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function all_extensions_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the all_extensions module.
+    case 'help.page.all_extensions':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('A custom module which let user upload all file type extensions') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function all_extensions_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  acceptAllExceptionsValidator($form);
+  $config = \Drupal::service('config.factory')->getEditable('system.file');
+  $config->set('allow_insecure_uploads', TRUE)->save();
+  if ($form_id == "field_config_edit_form") {
+    if (isset($form['settings']['file_extensions']) && $form['settings']['file_extensions']['#required']) {
+      $form['settings']['file_extensions']['#required'] = FALSE;
+    }
+  }
+}
+function acceptAllExceptionsValidator(&$element) {
+  if(isset($element['#type']) && $element['#type'] == 'managed_file') {
+    if(isset($element['#upload_validators']['file_validate_extensions'])) {
+      unset($element['#upload_validators']['file_validate_extensions']);
+    }
+  }
+  $children = Element::children($element);
+
+  if(is_array($children)) {
+    foreach($children as $child) {
+      acceptAllExceptionsValidator($element[$child]);
+    }
+  }
+}

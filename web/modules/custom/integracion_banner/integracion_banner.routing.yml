@@ -1,0 +1,25 @@
+integracion_banner.confirmaEnviarProgramaBanner:
+  path: '/node/{node}/confirmaEnviarProgramaBanner'
+  defaults:
+    _controller: '\Drupal\integracion_banner\Controller\IntegracionBannerController::confirmaEnviarProgramaBanner'
+  requirements:
+    _permission: 'access content,send program banner'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'programas_academicos'
+
+integracion_banner.enviarProgramaBanner:
+  path: '/node/{node}/enviarProgramaBanner'
+  defaults:
+    _controller: '\Drupal\integracion_banner\Controller\IntegracionBannerController::enviarProgramaBanner'
+  requirements:
+    _permission: 'access content,send program banner'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'programas_academicos'

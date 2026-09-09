@@ -1,0 +1,390 @@
+/**
+ * @file
+ * Subtheme specific CSS.
+ */
+
+.highlighted {
+  background: #F5F5F5;
+}
+
+fieldset,
+.content .details-wrapper {
+  border: solid 1px gray !important;
+  background: #eeeeee50;
+  padding-top: 5px;
+  padding-right: 12px;
+  padding-bottom: 10px;
+  padding-left: 12px;
+  border-radius: 5px;
+}
+.content .paragraph-type-label{
+  white-space:normal;
+  padding-left: 5px;
+}
+.content label {
+  padding-left: 5px;
+  font-weight: 700;
+}
+
+
+legend,
+summary {
+  float: none;
+  width: inherit;
+  font-size: 1em;
+  padding: 5px 10px;
+  border: solid 1px rgb(185, 185, 185);
+  background: rgb(233, 233, 233);
+  border-radius: 5px;
+}
+
+.ck-editor__editable_inline {
+  min-height: 200px;
+}
+#navbar-top section {
+  padding-top: 0px;
+}
+
+section {
+  padding-top: 20px;
+}
+
+.field--label-above .field__label,
+.field--label-inline .field__label {
+  color: #888;
+}
+
+.field--label-inline .field__item {
+  color: #000;
+}
+.field--label-above .field__item p{
+  color: #000;
+  display: block;
+  padding-left: 20px;
+}
+
+#block-views-block-proceso-padre-de-actividad-block-1,
+#block-views-block-plantilla-proceso-padre-de-actividad-block-1,
+#block-views-block-plan-mejoramiento-padre-de-actividad-block-1,
+#block-views-block-programa-academico-padre-de-historial-de-cambios,
+#block-views-block-programa-academico-padre-de-acreditaciones-vigentes,
+#block-views-block-programa-academico-padre-de-historial-acreditacione,
+#block-views-block-programa-academico-padre-de-historial-registros,
+#block-views-block-procesos-padre-programa-academico-block-1,
+#block-views-block-procesos-padre-modificacion-programa-academico {
+  background-color: #ddd;
+  padding: 10px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+table tr th,
+table tr th a,
+table tr th a:hover,
+table tr th a:focus {
+  color: unset !important;
+}
+
+table tr td,
+table tr th {
+  color: unset !important;
+  vertical-align: middle;
+}
+
+.field--name-field-calificaciones-globales .paragraph--type--factor,
+.field--name-field-calificaciones-globales .field--name-field-caracteristicas,
+.field--name-field-calificaciones-globales .field--name-field-caracteristicas .field--name-field-indicadores {
+  border-width: 1px;
+  box-sizing: border-box;
+  border-style: solid;
+  padding: 10px;
+  margin-bottom: 5px;
+}
+
+.field--name-field-calificaciones-globales .field--name-field-caracteristicas,
+.field--name-field-calificaciones-globales .field--name-field-caracteristicas .field--name-field-indicadores {
+  padding-left: 20px;
+}
+
+.form-actions .button,
+.form-actions .action-link {
+  margin-top: 22px;
+  margin-bottom: 22px;
+}
+
+.navbar-brand img {
+  min-height: 50px;
+}
+
+.navbar-expand-sm .navbar-collapse {
+  display: block !important;
+}
+
+.primary_menu {
+  justify-content: right;
+}
+
+.navbar-nav .nav-link {
+  padding-right: 5px !important;
+  padding-left: 5px !important;
+}
+
+a.nav-link--::before {
+  margin: 0px 0px -2px 0px;
+}
+
+.field--type-entity-reference {
+  margin: unset;
+}
+
+.field--label-above .field__items .field__item {
+  display: block;
+}
+
+#block-navegacionprincipal li a {
+  background-image: url(../images/sprite_icons.png);
+  color: #fff;
+  position: relative;
+  line-height: 40px;
+  width: 40px;
+  height: 40px;
+  padding: 5px 10px;
+  overflow: hidden;
+  background-position: 0px -110px;
+  background-repeat: no-repeat;
+}
+
+#block-navegacionprincipal li a.icon-informacion-institucional {
+  background: url("../images/uninorte_ytree.png") no-repeat scroll 0 0 transparent;
+}
+
+#block-navegacionprincipal li a.icon-adjuntos {
+  background: url("../images/sprite.png") no-repeat scroll 0 0 transparent;
+}
+
+#block-navegacionprincipal li a.icon-enlaces {
+  background: url("../images/link.png") no-repeat scroll 0 0 transparent;
+}
+
+#block-navegacionprincipal li a.icon-tablas-maestras {
+  background: url("../images/icon_config.png") no-repeat scroll 0 0 transparent;
+}
+
+#block-navegacionprincipal li a.icon-programas-academicos {
+  background-position: -40px -40px;
+}
+#block-navegacionprincipal li a.icon-plantillas-procesos {
+  background: url("../images/plantillas-menu.png") no-repeat scroll 0 0 transparent;
+  background-size: contain;
+}
+#block-navegacionprincipal li a.icon-procesos {
+  background: url("../images/procesos-menu.png") no-repeat scroll 0 0 transparent;
+  background-size: contain;
+}
+#block-navegacionprincipal li a.icon-plantilla {
+  background: url("../images/plantilla.png") no-repeat scroll 0 0 transparent;
+  background-size: 40px;
+}
+#block-navegacionprincipal li a.icon-calidad {
+  background: url("../images/libromaestro.png") no-repeat scroll 0 0 transparent;
+  background-size: 40px;
+}
+#block-navegacionprincipal li a.icon-planes-mejoramiento {
+  background-position: -80px -40px;
+}
+
+#block-navegacionprincipal li a.icon-indicadores_admin  {
+  background: url("../images/indica.png") no-repeat scroll 0 0 transparent;
+}
+
+#block-navegacionprincipal li a.icon-maestros span.icon {
+  background: url("../images/libromaestro.png") no-repeat scroll 0 0 transparent;
+}
+
+#block-navegacionprincipal li a.icon-procesos_registro span.icon {
+  background: url("../images/registro.png") no-repeat scroll 0 0 transparent;
+}
+
+#block-navegacionprincipal li a.icon-solicitudes_admin span.icon {
+  background: url("../images/solicitudes_admin.png") no-repeat scroll 0 0 transparent;
+}
+
+#block-navegacionprincipal li a.icon-asignaturas {
+  background: url("../images/asignaturas-menu.png") no-repeat scroll 0 0 transparent;
+  background-size: 40px;
+}
+
+#block-navegacionprincipal li a.icon-parcelaciones-generales {
+  background: url("../images/enviados.png") no-repeat scroll 0 0 transparent;
+  background-size: 40px;
+}
+
+#block-navegacionprincipal li a.icon-seguimientos span.icon {
+  background: url("../images/seguimientos.png") no-repeat scroll 0 0 transparent;
+}
+
+#block-navegacionprincipal li a.icon-documentos_admin span.icon {
+  background: url("../images/documentos_admin.png") no-repeat scroll 0 0 transparent;
+}
+
+#block-navegacionprincipal li a.icon-documentos_de_calidad span.icon {
+  background: url("../images/documentos.png") no-repeat scroll 0 0 transparent;
+}
+
+#block-navegacionprincipal li a.icon-plantillas_list span.icon {
+  background: url("../images/plantilla.png") no-repeat scroll 0 0 transparent;
+}
+
+#block-navegacionprincipal li a.icon-relaciones_nrc_docente span.icon {
+  background: url("../images/relacion_nrc.png") no-repeat scroll 0 0 transparent;
+  background-size: 40px;
+}
+
+#block-navegacionprincipal li a.icon-nrc_especificos span.icon {
+  background: url("../images/parcelacion_nrc.png") no-repeat scroll 0 0 transparent;
+  background-size: 40px;
+}
+
+#block-navegacionprincipal li a.icon-bandeja span.icon {
+  background: url("../images/bandeja.png") no-repeat scroll 0 0 transparent;
+  background-size: 40px;
+}
+#block-navegacionprincipal li a::before {
+  content: url("../images/enviados.png");
+  width: 40px;
+  height: 40px;
+  margin: 0px 10px;
+  padding: unset !important;
+}
+
+#block-navegacionprincipal li a {
+  overflow: hidden;
+  width: 40px;
+  height: 40px;
+  margin: 0px 10px;
+  padding: unset !important;
+}
+.asa{
+  background: url('images/sprite_icons.png') 0px 0px no-repeat;
+  display: block;
+  height: 40px;
+  width: 40px;
+  float: left;
+}
+
+.node--type-plan-estudios .field--name-field-plan-estudios-asignaturas .bloque_academico--field_plan_estudios_asignaturas,
+.node--type-adjuntos .section>nav>ul>li:nth-child(3)>a,
+.node-adjuntos-form .js-form-type-managed-file label,
+.node-adjuntos-form .js-form-managed-file .js-form-file,
+.node-form .js-form-managed-file .js-form-file,
+.form-managed-file__main .form-element--api-file {
+  display: none;
+}
+.form-control[type=submit] {
+  width: unset;
+}
+.alert-wrapper {
+  overflow: auto;
+}
+.main-content {
+  min-height: 500px;
+}
+.views-exposed-form .js-form-item {
+  padding-right: 5px;
+  padding-left: 5px;
+  width: 50%;
+}
+
+.fieldset-wrapper .js-form-item {
+  padding-right: 5px;
+  padding-left: 5px;
+  width: 100%;
+}
+
+.field--widget-text-textarea{
+  border: 1px solid gray;
+  background: #eee;
+  padding: 1%;
+}
+.ui-menu .ui-menu-item-wrapper {
+  display: block;
+}
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 50px;
+  --b: 8px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  padding: 1px;
+  background: conic-gradient(#0000 10%, #f03355) content-box;
+  -webkit-mask:
+    repeating-conic-gradient(#0000 0deg, #000 1deg 20deg, #0000 21deg 36deg),
+    radial-gradient(farthest-side, #0000 calc(100% - var(--b) - 1px), #000 calc(100% - var(--b)));
+  -webkit-mask-composite: destination-in;
+  mask-composite: intersect;
+  animation: l4 1s infinite steps(10);
+}
+.progress {
+  display: block;
+  height: unset;
+  overflow: unset;
+  font-size: unset;
+  background-color: unset;
+}
+.paragraphs-dropdown-action.button {
+  color:#D60C0C;
+}
+.paragraphs-dropdown-action.button:hover {
+  color:#FFF;
+}
+
+@keyframes l4 {
+  to {
+    transform: rotate(1turn)
+  }
+}
+.container-iframe {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding-top: 75%; /* 4:3 Aspect Ratio */
+}
+.container-docx {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+.responsive-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+}
+.node--view-mode-teaser {
+  border-bottom: unset;
+  margin-bottom: unset;
+}
+.node--view-mode-teaser .node__content {
+  margin-left: 10px;
+}
+@media (min-width: 1200px) {
+  .content .h1,
+  .content h1 {
+    font-size: 1.5rem;
+  }
+  .content .h2,
+  .content h2 {
+    font-size: 1.4rem;
+  }
+}
+
+table tr th{
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.path-visualizador-programas h1{
+  text-align: center;
+}

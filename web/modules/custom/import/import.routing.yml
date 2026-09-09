@@ -1,0 +1,118 @@
+import.campoAmplio:
+  path: '/import/campoAmplio'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::campoAmplio'
+  requirements:
+    _permission: 'access content'
+
+import.campoEspecifico:
+  path: '/import/campoEspecifico'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::campoEspecifico'
+  requirements:
+    _permission: 'access content'
+
+import.campoDetallado:
+  path: '/import/campoDetallado'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::campoDetallado'
+  requirements:
+    _permission: 'access content'
+
+import.categoriaAdjuntos:
+  path: '/import/categoriaAdjuntos'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::categoriaAdjuntos'
+  requirements:
+    _permission: 'access content'
+
+import.adjuntos:
+  path: '/import/adjuntos'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::adjuntos'
+  requirements:
+    _permission: 'access content'
+
+import.historialAcreditaciones:
+  path: '/import/historialAcreditaciones'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::historialAcreditaciones'
+  requirements:
+    _permission: 'access content'
+
+import.historialRegistroCalificado:
+  path: '/import/historialRegistroCalificado'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::historialRegistroCalificado'
+  requirements:
+    _permission: 'access content'
+
+import.historialDeCambios:
+  path: '/import/historialDeCambios'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::historialDeCambios'
+  requirements:
+    _permission: 'access content'
+
+import.acreditacionesVigentes:
+  path: '/import/acreditacionesVigentes'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::acreditacionesVigentes'
+  requirements:
+    _permission: 'access content'
+
+import.usuarios:
+  path: '/import/usuarios'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::usuarios'
+  requirements:
+    _permission: 'access content'
+
+import.dependencias:
+  path: '/import/dependencias'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::dependencias'
+  requirements:
+    _permission: 'access content'
+
+import.programasAcademicos:
+  path: '/import/programasAcademicos'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::programasAcademicos'
+  requirements:
+    _access: 'TRUE'
+
+import.programasAcademicosTextoEnriquecido:
+  path: '/import/programasAcademicosTextoEnriquecido'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::programasAcademicosTextoEnriquecido'
+  requirements:
+    _access: 'TRUE'
+
+import.planesEstudio:
+  path: '/import/planesEstudio'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::planesEstudio'
+  requirements:
+    _access: 'TRUE'
+
+import.asignaturas:
+  path: '/import/asignaturas'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::asignaturas'
+  requirements:
+    _access: 'TRUE'
+
+import.correccionUnidades:
+  path: '/import/correccionUnidades'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::correccionUnidades'
+  requirements:
+    _access: 'TRUE'
+
+import.correccionUsuarios:
+  path: '/import/correccionUsuarios'
+  defaults:
+    _controller: '\Drupal\import\Controller\ImportController::correccionUsuarios'
+  requirements:
+    _access: 'TRUE'

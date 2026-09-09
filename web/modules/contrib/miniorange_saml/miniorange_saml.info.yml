@@ -1,0 +1,13 @@
+name: 'miniOrange SAML Service Provider'
+type: module
+package: miniOrange
+core_version_requirement: ^9.3 || ^10
+description: 'Login to Drupal site through an external IdP using the SAML 2.0 Protocol'
+configure: miniorange_saml.sp_setup
+# version: '3.0.4'
+# project: 'miniorange_saml'
+# datestamp: 1687345077
+# Information added by Drupal.org packaging script on 2024-06-26
+version: '3.0.15'
+project: 'miniorange_saml'
+datestamp: 1719401972

@@ -1,0 +1,9 @@
+asignaturas_sincro.confirmaEnviarAsignatura:
+  route_name: 'asignaturas_sincro.confirmaEnviarAsignatura'
+  title: 'Guardar SYLLABUS General en Banner'
+  base_route: 'entity.node.canonical'
+  weight: 100
+  options:
+    attributes:
+      class:
+        - use-ajax

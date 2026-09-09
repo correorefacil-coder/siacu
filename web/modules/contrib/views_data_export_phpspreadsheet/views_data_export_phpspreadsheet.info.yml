@@ -1,0 +1,14 @@
+name: 'Views Data Export phpspreadsheet'
+type: module
+description: 'Plugin to export views data into xlsx.'
+package: 'Views'
+core_version_requirement: ^9 || ^10
+dependencies:
+  - drupal:rest
+  - drupal:views
+  - drupal:views_data_export
+
+# Information added by Drupal.org packaging script on 2023-09-05
+version: '2.0.1'
+project: 'views_data_export_phpspreadsheet'
+datestamp: 1693954449

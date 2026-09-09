@@ -1,0 +1,8 @@
+name: Visualizador Estado Programas Academicos.
+type: module
+description: Visualizador de datos de Procesos y Programas Academicos.
+package: Custom
+core_version_requirement: ^9 || ^10
+dependencies:
+  - node
+  - jquery_ui

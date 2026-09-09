@@ -1,0 +1,16 @@
+sincronizar_usuarios_uninorte.sync:
+  path: '/sincronizar-usuarios-uninorte'
+  defaults:
+    _title: 'sync'
+    _controller: '\Drupal\sincronizar_usuarios_uninorte\Controller\SincronizarUsuariosUninorteController::sync'
+  requirements:
+    _access: 'TRUE'
+
+sincronizar_usuarios_uninorte.sync_nombres:
+  path: '/sincronizar-nombres-uninorte'
+  defaults:
+    _title: 'sync'
+    _controller: '\Drupal\sincronizar_usuarios_uninorte\Controller\SincronizarUsuariosUninorteController::sync_nombres'
+  requirements:
+    _access: 'TRUE'
+

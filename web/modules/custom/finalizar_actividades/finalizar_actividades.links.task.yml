@@ -1,0 +1,5 @@
+finalizar_actividades.finalizar_actividad:
+  route_name: 'finalizar_actividades.finalizar_actividad'
+  title: 'Finalizar'
+  base_route: 'entity.node.canonical'
+  weight: 100

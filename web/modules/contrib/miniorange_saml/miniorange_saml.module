@@ -1,0 +1,110 @@
+<?php
+
+use Drupal\Core\Url;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\miniorange_saml\MiniorangeSAMLConstants;
+use Drupal\user\Entity\User;
+
+/* @file
+ *Module file for miniOrange SAML Module.
+*/
+
+function miniorange_saml_form_alter(&$form, FormStateInterface &$form_state, $form_id) {
+  if(isModuleConfigured()){
+    $formsDisplayingLoginLink = [
+      MiniorangeSAMLConstants::DRUPAL_USER_LOGIN_FORM,
+      MiniorangeSAMLConstants::DRUPAL_USER_LOGIN_BLOCK,
+    ];
+
+    $config                   = \Drupal::config('miniorange_saml.settings');
+    $isCustomFormLinkEnabled  = $config->get('miniorange_saml_sso_link_on_custom_form');
+    $customFormIds            = $isCustomFormLinkEnabled && $config->get('miniorange_saml_custom_form_ids') !== NULL ? explode(',', $config->get('miniorange_saml_custom_form_ids')) :[];
+    $formsDisplayingLoginLink = array_merge($formsDisplayingLoginLink, $customFormIds);
+
+    if (in_array($form_id, $formsDisplayingLoginLink)) {
+      getLoginLinkOnForm($form);
+      \Drupal::service('page_cache_kill_switch')->trigger();
+    }
+  }
+}
+
+/**
+ * Implements hook_help().
+*/
+function miniorange_saml_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.miniorange_saml':
+      $url = Url::fromRoute('user.admin_index')->toString();
+      $moduleLink = $url .'/miniorange_saml/idp_setup';
+      $supoortLink = $url .'/miniorange_saml/MiniorageSupport';
+      $configureIDP = $url .'/miniorange_saml/sp_setup';
+
+      $moduleLandingPage = 'https://plugins.miniorange.com/drupal-saml-single-sign-on-sso';
+      $setup_guides = 'https://plugins.miniorange.com/configure-drupal-saml-single-sign-on';
+      $SAML_FAQ = 'https://faq.miniorange.com/kb/drupal/saml-drupal/';
+
+      $output = '';
+      $output .= '<h3>' . t('About <a target="_blank" href="' . $moduleLandingPage . '">[Know more]</a>') . '</h3>';
+      $output .= '<p>' . t('SAML 2.0 SP Single Sign On (SSO) - Service Provider module allows users residing at a SAML 2.0 capable Identity Provider to login to your Drupal site. This module allows your Drupal site to act as a SAML 2.0 Service Provider which can be configured to establish the trust between the Drupal site and various SAML 2.0 supported Identity Providers to securely authenticate the user into the Drupal site.') . '</p>';
+      $output .= '<h3>' . t('Configuration') . '</h3>';
+      $output .= '<p>' . t('Configure miniOrange SAML Service Provider under Configuration » <a target = "_blank" href=" ' . $url . ' ">People</a> » <a target = "_blank" href=" ' . $moduleLink . ' ">miniOrange SAML Service Provider</a>:') . '</p>';
+      $output .= '<p>
+                           <ol>
+                              <li>' . t('Navigate to <a target="_blank" href="' . $configureIDP . '">Service Provider tab </a> of the module and configure your Identity Provider. You can use these setup guides <a target="_blank" href="'. $setup_guides .'">Setup Guides</a>') . '</li>
+                              <li>' . t('Once the configuration is done, please click on the <strong>Test Configuration</strong> button on the same page and confirm configuration is correct.') . '</li>
+                              <li>' . t('If you need any assistance, navigate to <a target = "_blank" href="'. $supoortLink .'">Support tab</a> and submit your query. You can also email us at <a href="mailto:drupalsupport@xecurify.com">drupalsupport@xecurify.com</a> or <a href="mailto:info@xecurify.com">info@xecurify.com</a>') . '</li>
+                           </ol>
+                        </p>';
+      $output .= '<h3>' . t('Setup Guides') . '</h3>';
+      $output .= '<p>' . t('Click <a target="_blank" href="'. $setup_guides .'">here</a> to check out the setup guides for different Identity Providers.') . '</p>';
+
+      $output .= '<h3>' . t('Troubleshoot and FAQ') . '</h3>';
+      $output .= '<p>' . t('Click <a target="_blank" href="'. $SAML_FAQ .'">here</a> to check out the frequently asked questions and their answers.') . '</p>';
+
+      return $output;
+  }
+
+}
+
+/**
+ * Implements hook_theme().
+ * This hook used for rendering twig template files
+ * References:
+ * - Twig Template: https://www.drupal.org/docs/develop/theming-drupal/twig-in-drupal
+ * - hook_theme(): https://api.drupal.org/api/function/hook_theme
+ */
+function miniorange_saml_theme($existing, $type, $theme, $path) {
+  return [
+    'mo-saml-request-trial' => [
+      'variables' => ['trial_details' => NULL],
+    ],
+    'mo-saml-send-ticket-info' => [
+      'variables' => ['ticket_number' => NULL],
+    ],
+  ];
+}
+
+function getLoginLinkOnForm(&$form){
+  $samlLoginUrl = Url::fromRoute('miniorange_saml.saml_login')->toString();
+  $idpName      = \Drupal::config('miniorange_saml.settings')->get('miniorange_saml_idp_name');
+
+  $ssoLink = [
+    ':url' => $samlLoginUrl,
+    '@idp_name' => $idpName,
+  ];
+
+  $form['miniorange_saml_login_url']= [
+    '#markup' => t('<a href=":url">Login using @idp_name</a>' , $ssoLink)
+  ];
+}
+
+function isModuleConfigured(){
+  $config          = \Drupal::config('miniorange_saml.settings');
+  $enableSamlLogin = $config->get('miniorange_saml_enable_login');
+  $idpIssuer       = $config->get('miniorange_saml_idp_issuer');
+  $idpName         = $config->get('miniorange_saml_idp_name');
+  return $enableSamlLogin && !empty($idpName) && !empty($idpIssuer);
+}
+
+

@@ -1,0 +1,25 @@
+activar_proceso.activar_proceso:
+  path: '/node/{node}/activarProceso'
+  defaults:
+    _controller: '\Drupal\activar_proceso\Controller\ActivarProcesoController::activarProceso'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'procesos'
+
+activar_proceso.actualizar_proceso:
+  path: '/node/{node}/actualizarProceso'
+  defaults:
+    _controller: '\Drupal\activar_proceso\Controller\ActualizarProcesoController::actualizarProceso'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'procesos'

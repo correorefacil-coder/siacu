@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for form templates.
+ */
+function gap_theme_suggestions_views_view_alter(array &$suggestions, array $variables)
+{
+  if (isset($variables['view'])) {
+    $view_id = $variables['view']->id();
+    $view_block = $variables['view']->getDisplay()->display['id'];
+    $suggestions[] = 'views_view__' . $view_id;
+    $suggestions[] = 'views_view__' . $view_id . '__' . $view_block;
+  }
+  return $suggestions;
+}
+
+function gap_preprocess_file_link(&$variables)
+{
+  $file = $variables['file'];
+  $uri = $variables['link']['#url']->getUri();
+  $filename = $file->getFilename();
+  $items = explode('.',$filename);
+  $variables['ext'] = strtolower(end($items));
+  $variables['uri'] = (str_replace('base:','',$uri));
+  $variables['file_url'] = urldecode(\Drupal::service('file_url_generator')->generateAbsoluteString($variables['file']->getFileUri()));
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function gap_form_alter(&$form, $form_state, $form_id)
+{
+  if (($form_id == 'user_login_block' || $form_id == 'user_login_form')) {
+    if (isset($form['more-links']['forgot_password_link'])) {
+      unset($form['more-links']['forgot_password_link']);
+    }
+  }
+}

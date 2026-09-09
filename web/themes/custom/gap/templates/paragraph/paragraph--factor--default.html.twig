@@ -1,0 +1,113 @@
+{# COUNT GLOBAL FACTOR INDICADORES #}
+{% set countGlobalIndicadores = 0 %}
+{% set countLocalIndicadores = 0 %}
+{% set calificacionesLocalCaracteristicas = [] %}
+
+{% set calificacionesLocalFactor = 0 %}
+{% set sumaLocalCalificacionCaracteristicas = 0 %}
+{% for caracteristica in content.field_caracteristicas["#items"] %}
+  {% set indicadores = drupal_field('field_indicadores', 'paragraph', caracteristica.target_id) %}
+  {% set countGlobalIndicadores = countGlobalIndicadores + indicadores["#items"]|length %}
+
+  {% set countLocalIndicadores = indicadores["#items"]|length %}
+  {% set sumaLocalCalificacionIndicadores = 0 %}
+
+  {% for indicador in indicadores["#items"] %}
+    {% if drupal_field('field_calificacion', 'paragraph', indicador.target_id) %}
+      {% set sumaLocalCalificacionIndicadores = drupal_field('field_calificacion', 'paragraph', indicador.target_id)["#items"][0].value + sumaLocalCalificacionIndicadores %}
+    {% endif %}
+  {% endfor %}
+
+  {# Calificacion Caracteristicas #}
+  {% set calificacionesLocalCaracteristica = sumaLocalCalificacionIndicadores / (indicadores["#items"]|length) %}
+  {% set calificacionesLocalCaracteristicas = calificacionesLocalCaracteristicas|merge([calificacionesLocalCaracteristica]) %}
+
+  {% set sumaLocalCalificacionCaracteristicas = calificacionesLocalCaracteristica + sumaLocalCalificacionCaracteristicas %}
+{% endfor %}
+
+{# Calificacion Caracteristicas #}
+{% set countCaracteristicas = content.field_caracteristicas["#items"]|length %}
+{% set calificacionesLocalFactor = sumaLocalCalificacionCaracteristicas / countCaracteristicas %}
+{% set content = content|merge({ "calificacionesLocalFactor": calificacionesLocalFactor}) %}
+
+{# COUNTERS CICLOS #}
+{% set counterCaracteristica = 0 %}
+{% set counterIndicador = 0 %}
+
+{% for caracteristica in content.field_caracteristicas["#items"] %}
+
+  {% set indicadores = drupal_field('field_indicadores', 'paragraph', caracteristica.target_id) %}
+  {% set countLocalIndicadores = indicadores["#items"]|length %}
+
+  {% set counterIndicador = 0 %}
+  {% for indicador in indicadores["#items"] %}
+
+    <tr>
+      {% if counterCaracteristica == 0 and counterIndicador == 0 %}
+
+        <td rowspan="{{countGlobalIndicadores}}">
+          {{ content.field_nombre_factor }}
+        </td>
+        <td rowspan="{{countGlobalIndicadores}}">
+          {{ content.field_ponderacion }}
+        </td>
+        <td rowspan="{{countGlobalIndicadores}}">
+          {{ content.field_justificacion }}
+        </td>
+        <td rowspan="{{countGlobalIndicadores}}">
+          {{ content.field_evidencias }}
+        </td>
+        <td rowspan="{{countGlobalIndicadores}}">
+          {{ calificacionesLocalFactor }}
+        </td>
+
+      {% endif %}
+      {% if counterIndicador == 0 %}
+        <td rowspan="{{countLocalIndicadores}}">
+          {{ drupal_field('field_nombre_caracteristica', 'paragraph', caracteristica.target_id) }}
+        </td>
+        <td rowspan="{{countLocalIndicadores}}">
+          {{ caracteristicas.field_ponderacion}}
+          {{ drupal_field('field_ponderacion', 'paragraph', caracteristica.target_id) }}
+        </td>
+        <td rowspan="{{countLocalIndicadores}}">
+          {{ drupal_field('field_justificacion', 'paragraph', caracteristica.target_id) }}
+        </td>
+        <td rowspan="{{countLocalIndicadores}}">
+          {{ drupal_field('field_evidencias', 'paragraph', caracteristica.target_id) }}
+        </td>
+        <td rowspan="{{countLocalIndicadores}}">
+          {{ calificacionesLocalCaracteristicas[counterCaracteristica] |number_format(2, '.', ',') }}
+        </td>
+      {% endif %}
+
+      <td>
+        {{ drupal_field('field_nombre_indicador', 'paragraph', indicador.target_id) }}
+      </td>
+      <td>
+        {{ drupal_field('field_calificacion', 'paragraph', indicador.target_id)  }}
+      </td>
+      <td>
+        {{ drupal_field('field_entregable', 'paragraph', indicador.target_id) }}
+      </td>
+      <td>
+        {{ drupal_field('field_fuente_informacion', 'paragraph', indicador.target_id) }}
+      </td>
+      <td>
+        {{ drupal_field('field_responsables', 'paragraph', indicador.target_id) }}
+      </td>
+      <td>
+        {{ drupal_field('field_tipo_evidencia', 'paragraph', indicador.target_id) }}
+      </td>
+      <td>
+        {{ drupal_field('field_evidencias', 'paragraph', indicador.target_id) }}
+      </td>
+      <td>
+        {{ drupal_field('field_caracteristicas_minimas', 'paragraph', indicador.target_id) }}
+      </td>
+    </tr>
+
+    {% set counterIndicador = counterIndicador + 1 %}
+  {% endfor %}
+  {% set counterCaracteristica = counterCaracteristica + 1 %}
+{% endfor %}

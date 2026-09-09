@@ -1,0 +1,80 @@
+<?php
+
+use Drupal\Core\Render\Markup;
+use Drupal\activar_proceso\Controller\ActivarProcesoController;
+
+/**
+ * Implements hook_mail().
+ */
+function activar_proceso_mail($key, &$message, $params) {
+  $options = array(
+    'langcode' => $message['langcode'],
+  );
+  switch ($key) {
+    case 'correo_activar_proceso':
+      $message['subject'] = t('@subject', array('@subject' => $params['subject']), $options);
+      $message['body'][] = Markup::create($params['message']);
+      break;
+  }
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function activar_proceso_menu_local_tasks_alter(&$data,$route_name,&$cacheability) {
+ $cacheability
+    ->addCacheContexts([
+    'user.permissions',
+    'url',
+  ]);
+  $route_match = \Drupal::routeMatch();
+  if (
+    $route_match->getRouteName() == 'entity.node.canonical' ||
+    $route_match->getRouteName() == 'entity.node.latest_version' ||
+    $route_match->getRouteName() == 'entity.node.edit_form'
+  ) {
+    $node = $route_match->getParameter('node');
+    if($node->bundle()=='procesos') {
+      $controller = new ActivarProcesoController;
+      $estado = $controller->getEstadoProceso($node);
+      switch ($estado) {
+
+        case $controller::INICIADO:
+          unset($data['tabs'][0]['activar_proceso.actualizar_proceso']);
+          break;
+
+        case $controller::PROCESO:
+          unset($data['tabs'][0]['activar_proceso.activar_proceso']);
+          unset($data['tabs'][0]['activar_proceso.actualizar_proceso']);
+          break;
+
+        case $controller::FINALIZADO:
+          unset($data['tabs'][0]['entity.node.edit_form']);
+          unset($data['tabs'][0]['entity.node.delete_form']);
+          unset($data['tabs'][0]['activar_proceso.activar_proceso']);
+          break;
+
+        case $controller::ACTUALIZADO:
+          unset($data['tabs'][0]['entity.node.edit_form']);
+          unset($data['tabs'][0]['entity.node.delete_form']);
+          unset($data['tabs'][0]['activar_proceso.activar_proceso']);
+          unset($data['tabs'][0]['activar_proceso.actualizar_proceso']);
+          break;
+
+        case $controller::SUSPENDIDO:
+          unset($data['tabs'][0]['entity.node.edit_form']);
+          unset($data['tabs'][0]['entity.node.delete_form']);
+          unset($data['tabs'][0]['activar_proceso.activar_proceso']);
+          unset($data['tabs'][0]['activar_proceso.actualizar_proceso']);
+          break;
+
+        case $controller::CANCELADO:
+          unset($data['tabs'][0]['activar_proceso.activar_proceso']);
+          unset($data['tabs'][0]['activar_proceso.actualizar_proceso']);
+          break;
+
+      }
+
+    }
+  }
+}

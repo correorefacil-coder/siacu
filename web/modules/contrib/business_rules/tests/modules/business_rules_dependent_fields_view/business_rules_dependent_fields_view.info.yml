@@ -1,0 +1,17 @@
+name: 'Business Rules: test dependent fields view'
+description: 'See \Drupal\Tests\business_rules\FunctionalJavascript\DependentFieldsView. This test module is similar to business_rules_paragraphs_ajax_support, except it sets up fields in a node, instead of fields in a paragraph.'
+package: Workflow
+
+type: module
+core_version_requirement: ^9 || ^10
+
+dependencies:
+  - business_rules:business_rules
+  - drupal:node
+  - drupal:taxonomy
+  - drupal:views
+
+# Information added by Drupal.org packaging script on 2024-01-26
+version: '3.0.0-beta1'
+project: 'business_rules'
+datestamp: 1706285593

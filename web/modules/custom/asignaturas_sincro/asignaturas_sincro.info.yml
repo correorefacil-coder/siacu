@@ -1,0 +1,5 @@
+name: Asignaturas Sincro
+type: module
+description: Sincronizador de tipo de contenido Asignaturas con Banner
+package: Custom
+core_version_requirement: ^9 || ^10

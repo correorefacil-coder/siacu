@@ -1,0 +1,27 @@
+plan_estudios.importando:
+  path: '/plan-estudios/importando'
+  defaults:
+    _title: 'Example'
+    _controller: '\Drupal\plan_estudios\Controller\PlanEstudiosController::importando'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'plan_estudios'
+
+plan_estudios.reporte:
+  path: '/plan-estudios/reporte/{node}'
+  defaults:
+    _title: 'Example'
+    _controller: '\Drupal\plan_estudios\Controller\PlanEstudiosController::plan_estudios_generar_reporte'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'plan_estudios'

@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Reporte Historico Programas module.
+ */
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function reporte_historico_programas_menu_local_tasks_alter(&$data,$route_name,&$cacheability) {
+
+  $cacheability
+    ->addCacheContexts([
+    'user.permissions',
+    'url',
+  ]);
+  $route_match = \Drupal::routeMatch();
+
+  $node = $route_match->getParameter('node');
+  if (!empty($node) && is_object($node) && $node->bundle() != 'programas_academicos') {
+    unset($data['tabs'][0]['reporte_historico_programas.reporte_historico_programa']);
+  }
+  if (
+    $route_match->getRouteName() == 'entity.node.canonical' ||
+    $route_match->getRouteName() == 'entity.node.latest_version' ||
+    $route_match->getRouteName() == 'entity.node.edit_form'
+  ) {
+    unset($data['tabs'][0]['reporte_historico_programas.reporte_historico_programa']);
+  }
+}

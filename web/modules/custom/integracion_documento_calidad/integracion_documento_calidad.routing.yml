@@ -1,0 +1,142 @@
+integracion_documento_calidad.finalizarDocumentoCalidadDrive:
+  path: '/node/{node}/finalizarDocumentoCalidadDrive'
+  defaults:
+    _controller: '\Drupal\integracion_documento_calidad\Controller\IntegracionDocumentoCalidadController::finalizarDocumentoCalidadDrive'
+  requirements:
+    _permission: 'documento calidad'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'documentos_calidad'
+
+integracion_documento_calidad.finalizarDocumentoCalidadDriveCurl:
+  path: '/node/{node}/finalizarDocumentoCalidadDriveCurl'
+  defaults:
+    _controller: '\Drupal\integracion_documento_calidad\Controller\IntegracionDocumentoCalidadController::finalizarDocumentoCalidadDriveCurl'
+  requirements:
+    _permission: 'documento calidad'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'documentos_calidad'
+
+integracion_documento_calidad.reactivarDocumentoCalidadDrive:
+  path: '/node/{node}/reactivarDocumentoCalidadDrive'
+  defaults:
+    _controller: '\Drupal\integracion_documento_calidad\Controller\IntegracionDocumentoCalidadController::reactivarDocumentoCalidadDrive'
+  requirements:
+    _permission: 'documento calidad'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'documentos_calidad'
+
+integracion_documento_calidad.reactivarDocumentoCalidadDriveCurl:
+  path: '/node/{node}/reactivarDocumentoCalidadDriveCurl'
+  defaults:
+    _controller: '\Drupal\integracion_documento_calidad\Controller\IntegracionDocumentoCalidadController::reactivarDocumentoCalidadDriveCurl'
+  requirements:
+    _permission: 'documento calidad'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'documentos_calidad'
+
+integracion_documento_calidad.zipDocumentoCalidadDrive:
+  path: '/node/{node}/zipDocumentoCalidadDrive'
+  defaults:
+    _controller: '\Drupal\integracion_documento_calidad\Controller\IntegracionDocumentoCalidadController::zipDocumentoCalidadDrive'
+  requirements:
+    _permission: 'documento calidad'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'documentos_calidad'
+
+integracion_documento_calidad.zipDocumentoCalidadDriveCurl:
+  path: '/node/{node}/zipDocumentoCalidadDriveCurl'
+  defaults:
+    _controller: '\Drupal\integracion_documento_calidad\Controller\IntegracionDocumentoCalidadController::zipDocumentoCalidadDriveCurl'
+  requirements:
+    _permission: 'documento calidad'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'documentos_calidad'
+
+integracion_documento_calidad.respuestaDrivePlantilla:
+  path: '/node/{node}/respuestaDrivePlantilla'
+  defaults:
+    _title: 'Esperando respuesta Office365...'
+    _controller: '\Drupal\integracion_documento_calidad\Controller\IntegracionDocumentoCalidadController::respuestaDrivePlantilla'
+  requirements:
+    _permission: 'documento calidad'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'plantillas'
+
+integracion_documento_calidad.respuestaDriveDocumento:
+  path: '/node/{node}/respuestaDriveDocumento'
+  defaults:
+    _title: 'Esperando respuesta Office365...'
+    _controller: '\Drupal\integracion_documento_calidad\Controller\IntegracionDocumentoCalidadController::respuestaDriveDocumento'
+  requirements:
+    _permission: 'documento calidad'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'documentos_calidad'
+
+integracion_documento_calidad.ajaxRespuestaDrive:
+  path: '/node/{node}/ajaxRespuestaDrive'
+  defaults:
+    _title: 'Ajax respuesta Office365...'
+    _controller: '\Drupal\integracion_documento_calidad\Controller\IntegracionDocumentoCalidadController::ajaxRespuestaDrive'
+  requirements:
+    _permission: 'documento calidad'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'documentos_calidad'
+          - 'plantillas'
+
+integracion_documento_calidad.descargarZIPDocumentoCalidadDrive:
+  path: '/node/{node}/descargarZIPDocumentoCalidadDrive'
+  defaults:
+    _title: 'Ajax respuesta Office365...'
+    _controller: '\Drupal\integracion_documento_calidad\Controller\IntegracionDocumentoCalidadController::zipDocumentoCalidadDrive'
+  requirements:
+    _permission: 'documento calidad'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'documentos_calidad'
+
+integracion_documento_calidad.recepcionUrlCalidad:
+  path: '/recepcionUrlCalidad'
+  defaults:
+    _title: 'Recepcion de Url de Edicion en Office365 de Documentos Calidad'
+    _controller: '\Drupal\integracion_documento_calidad\Controller\IntegracionDocumentoCalidadController::recepcionUrlCalidad'
+  requirements:
+    _access: 'TRUE'

@@ -1,0 +1,4 @@
+send program banner:
+  title: 'Enviar Asignatura a Banner'
+  description: 'Enviar Asignatura a Banner'
+  restrict access: false

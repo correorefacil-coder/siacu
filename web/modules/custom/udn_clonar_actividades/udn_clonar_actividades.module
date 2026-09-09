@@ -1,0 +1,402 @@
+<?php
+
+use Drupal\views\Views;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\AlertCommand;
+use Drupal\Core\Ajax\InvokeCommand;
+use Drupal\Core\Url;
+
+
+/**
+ * Implements hook_page_attachments().
+ */
+function udn_clonar_actividades_page_attachments(array &$attachments) {
+  $libraries = [
+    'udn_clonar_actividades/udn_clonar_actividades',
+  ];
+  foreach($libraries as $library) {
+    $attachments['#attached']['library'][] = $library;
+  }
+}
+
+/**
+* Implement hook_entity_presave
+*/
+function udn_clonar_actividades_entity_presave($entity){
+
+  // Check entidad de tipo Nodo
+  if ($entity->getEntityType()->id() != 'node') {
+    return;
+  }
+
+  $id = $entity->id();
+  $type = $entity->getType();
+  $op = null;
+
+  if (!empty($id)) {
+    return;
+  }
+
+  // Check Nodo tipo Procesos
+  if ($type != 'procesos') {
+    return;
+  }
+
+  // Obtencion de ID de plantilla
+  $plantillaID = null;
+  $plantillaEntity = null;
+  if (isset($entity->field_proceso_plantilla[0])) {
+    $plantillaID = $entity->field_proceso_plantilla[0]->getValue();
+    $plantillaID = $plantillaID['target_id'];
+    $plantillaEntity = \Drupal::entityTypeManager()->getStorage('node')->load($plantillaID);
+    $plantillaID = $plantillaEntity->id();
+  }
+
+  // Control si no hay plantilla seleccionada.
+  if (empty($plantillaID)){
+    return;
+  }
+
+  // Clonacion de plantillas
+  $actividadesClonadas = _clona_actividades_por_plantilla($plantillaEntity);
+  $entity->field_proceso_actividades = $actividadesClonadas;
+
+  $field_plantilla_proceso_tipo = $plantillaEntity->field_plantilla_proceso_tipo[0]->getValue();
+  $plantilla_proceso_tipo = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($field_plantilla_proceso_tipo['target_id'])->getName();
+
+  $procesos_pa_title = '';
+  if (!$entity->field_procesos_pa->isEmpty()) {
+    $procesos_pa_ID = $entity->field_procesos_pa[0]->getValue();
+    $procesos_pa_ID = $procesos_pa_ID['target_id'];
+    $procesos_pa_Entity = \Drupal::entityTypeManager()->getStorage('node')->load($procesos_pa_ID);
+    $procesos_pa_title = ' - ' .$procesos_pa_Entity->getTitle();
+  } elseif (!$entity->field_procesos_pa_existente->isEmpty()) {
+    $procesos_pa_ID = $entity->field_procesos_pa_existente[0]->getValue();
+    $procesos_pa_ID = $procesos_pa_ID['target_id'];
+    $procesos_pa_Entity = \Drupal::entityTypeManager()->getStorage('node')->load($procesos_pa_ID);
+    $procesos_pa_title = ' - ' . $procesos_pa_Entity->getTitle();
+  }
+  $year = ' - '.date("Y");
+
+  $entity->field_identificador_proceso->value = $plantilla_proceso_tipo . $procesos_pa_title . $year;
+
+  return;
+
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function udn_clonar_actividades_form_alter(&$form, &$form_state, $form_id) {
+
+  $form = controlPlantillaEnProcesos($form, $form_state, $form_id);
+  $form = controlModificacionesEnProcesos($form, $form_state, $form_id);
+
+}
+
+/**
+ * Implementaciones de control campos de Modificaciones en el tipo de contenido procesos.
+ */
+function controlModificacionesEnProcesos(&$form, &$form_state, $form_id) {
+
+  // Creando o editando tipo de contenido Procesos
+  if ($form_id == 'node_procesos_form' || $form_id == 'node_procesos_edit_form') {
+
+    // Carga de actividades por ajax.
+    $form['field_tipo_modificaciones']['widget']['#ajax'] = array(
+      'event' => 'change',
+      'callback' => 'procesosModificacionTiposAjax',
+      'progress' => [
+        'type' => 'throbber',
+        'message' => t('Cargando...'),
+      ]
+    );
+
+  }
+
+  return $form;
+}
+
+/**
+ *  Funcion Ajax de actividades en creacion de procesos.
+ */
+function procesosModificacionTiposAjax($form, $form_state, $form_id) {
+
+  $programaAcademicoSelected = $form_state->getValue('field_procesos_pa_existente');
+  $programaAcademicoSelected = $programaAcademicoSelected[0]['target_id'];
+
+  // Validacion Programa academico existente
+  if (empty($programaAcademicoSelected)) {
+    $response = new AjaxResponse();
+    $response->addCommand(new AlertCommand("Falta seleccionar Programa Académico (Existente) valido."));
+    $response->addCommand(new InvokeCommand('#edit-field-procesos-pa-existente-0-target-id', 'addClass', array('error')));
+    return $response;
+  }
+
+  // Recoleccion de seleccionados en tipo de modificacion
+  $selectedValues = $form_state->getValue('field_tipo_modificaciones');
+  $programa = \Drupal::entityTypeManager()->getStorage('node')->load($programaAcademicoSelected);
+
+  $selected = [];
+  foreach ($selectedValues as $key => $value) {
+    if (isset($value['value'])) {
+      switch ($value['value']) {
+
+        case 'denominacion':
+          //field_titulo_otorga
+          $title = $programa->getTitle();
+          $otorga = $programa->get('field_titulo_otorga')->getValue();
+          $lugares = $programa->get('field_municipio_pa')->referencedEntities();
+          $lugaresOut = [];
+          $otorgaOut = '';
+          foreach ($lugares as $key => $lugar) {
+            $link = $lugar->toLink()->toString();
+            $lugaresOut[] = $link;
+          }
+          if (!empty($otorga)) {
+            $otorgaOut = $otorga[0]['value'];
+          }
+          $selected['denominacion']['title'] = $title;
+          $selected['denominacion']['otorga'] = $otorgaOut;
+          $selected['denominacion']['lugar'] = $lugaresOut;
+          break;
+
+        case 'lugar':
+          $lugares = $programa->get('field_municipio_pa')->referencedEntities();
+          $lugaresOut = [];
+          foreach ($lugares as $key => $lugar) {
+            $link = $lugar->toLink()->toString();
+            $lugaresOut[] = $link;
+          }
+          $selected['lugar']['lugar'] = $lugaresOut;
+          break;
+
+        case 'metodologia':
+          $metodologias = $programa->get('field_modalidad_szvpric')->referencedEntities();
+          $metodologiasOut = [];
+          foreach ($metodologias as $key => $metodologia) {
+            $link = $metodologia->toLink()->toString();
+            $metodologiasOut[] = $link;
+          }
+          $selected['metodologia']['metodologia'] = $metodologiasOut;
+          break;
+
+        case 'duracion':
+          $duracionProgramas = $programa->get('field_duracion_programa')->referencedEntities();
+
+          $periodicidad = $programa->get('field_periodicidad')->getValue();
+          $periodicidad = reset($periodicidad);
+
+          $tiempo = $programa->get('field_pa_duracion_tiempo')->getValue();
+          $duracionProgramasOut = [];
+
+          $field_pa_campo_amplio = $programa->get('field_pa_campo_amplio')->referencedEntities();
+          $field_pa_campo_especifico = $programa->get('field_pa_campo_especifico')->referencedEntities();
+          $field_pa_campo_detllado = $programa->get('field_pa_campo_detllado')->referencedEntities();
+
+          $periodicidadOut = '';
+          $tiempoOut = '';
+
+          foreach ($duracionProgramas as $key => $duracionPrograma) {
+            $link = $duracionPrograma->toLink()->toString();
+            $duracionProgramasOut[] = $link;
+          }
+          foreach ($field_pa_campo_amplio as $key => $amplio) {
+            $link = $amplio->getName();
+            $campo_amplio[] = $link;
+          }
+          $campo_amplio = reset($campo_amplio);
+          foreach ($field_pa_campo_especifico as $key => $especifico) {
+            $link = $especifico->getName();
+            $campo_especifico[] = $link;
+          }
+          $campo_especifico = reset($campo_especifico);
+          foreach ($field_pa_campo_detllado as $key => $detallado) {
+            $link = $detallado->getName();
+            $campo_detllado[] = $link;
+          }
+          $campo_detllado = reset($campo_detllado);
+
+          if (!empty($periodicidad)) {
+            $periodicidadOut = $periodicidad['value'];
+          }
+
+          if (!empty($tiempo)) {
+            $tiempoOut = $tiempo[0]['value'];
+          }
+          $selected['duracion']['duracion'] = $duracionProgramasOut;
+          $selected['duracion']['periodicidad'] = $periodicidadOut;
+
+          $selected['duracion']['tiempo'] = $tiempoOut;
+          $selected['duracion']['amplio'] = $campo_amplio;
+          $selected['duracion']['especifico'] = $campo_especifico;
+          $selected['duracion']['detallado'] = $campo_detllado;
+          break;
+
+        case 'conocimiento':
+          $field_pa_campo_amplio = $programa->get('field_pa_campo_amplio')->referencedEntities();
+          $field_pa_campo_especifico = $programa->get('field_pa_campo_especifico')->referencedEntities();
+          $field_pa_campo_detllado = $programa->get('field_pa_campo_detllado')->referencedEntities();
+
+          foreach ($field_pa_campo_amplio as $key => $amplio) {
+            $link = $amplio->getName();
+            $campo_amplio[] = $link;
+          }
+          $campo_amplio = reset($campo_amplio);
+          foreach ($field_pa_campo_especifico as $key => $especifico) {
+            $link = $especifico->getName();
+            $campo_especifico[] = $link;
+          }
+          $campo_especifico = reset($campo_especifico);
+          foreach ($field_pa_campo_detllado as $key => $detallado) {
+            $link = $detallado->getName();
+            $campo_detllado[] = $link;
+          }
+          $campo_detllado = reset($campo_detllado);
+
+          if (!empty($tiempo)) {
+            $tiempoOut = $tiempo[0]['value'];
+          }
+
+          $selected['conocimiento']['amplio'] = $campo_amplio;
+          $selected['conocimiento']['especifico'] = $campo_especifico;
+          $selected['conocimiento']['detallado'] = $campo_detllado;
+          break;
+
+        case 'admision':
+          $periodicidad = $programa->get('field_periodicidad')->getValue();
+          $periodicidad = reset($periodicidad);
+          $periodicidadOut = '';
+          if (!empty($periodicidad)) {
+            $periodicidadOut = $periodicidad['value'];
+          }
+          $selected['admision']['periodicidad'] = $periodicidadOut;
+          break;
+
+        case 'cupos':
+          $cupos = $programa->get('field_cupo_maximo')->getValue();
+          $cuposOut = '';
+          if (!empty($cupos)) {
+            $cuposOut = $cupos[0]['value'];
+          }
+          $selected['cupos'] = $cuposOut;
+          break;
+
+        case 'plan':
+          $planes = $programa->get('field_planes_estudios')->referencedEntities();
+          $planesOut = [];
+          foreach ($planes as $key => $plan) {
+            $link = $plan->toLink()->toString();
+            $planesOut[] = $link;
+          }
+          $selected['plan'] = $planesOut;
+          break;
+
+        case 'convenios':
+          $convenios = $programa->get('field_convenio_ref')->referencedEntities();
+          $conveniosOut = [];
+          foreach ($convenios as $key => $convenio) {
+            $link = $convenio->toLink()->toString();
+            $conveniosOut[] = $link;
+          }
+          $selected['convenios'] = $conveniosOut;
+          break;
+      }
+    }
+  }
+  $response = new AjaxResponse();
+  $response->addCommand(new InvokeCommand(NULL, 'myAjaxCallback', [$selected] ));
+  return $response;
+
+}
+
+/**
+ * Implementaciones de control campos de plantilla en el tipo de contenido procesos.
+ */
+function controlPlantillaEnProcesos(&$form, &$form_state, $form_id) {
+
+  // Creando tipo de contenido Procesos
+  if ($form_id == 'node_procesos_form') {
+    // Desactiva opciones no deseadas
+    unset($form['field_tipo_modificaciones']['widget']["#options"]['_none'] );
+    unset($form['field_proceso_actividades']);
+
+    $form['field_proceso_plantilla']['#prefix'] = '<div class="udn-proceso-plantilla">';
+    $form['field_proceso_plantilla']['#suffix'] = '</div>';
+
+    // Espacio reservado para mostrar las actividades de la plantilla
+    $form['actividades-view'] = array(
+      '#title' => 'Actividades de la platilla',
+      '#type' => 'fieldset',
+      '#prefix' => '<div id="actividades">',
+      '#suffix' => '</div>',
+      '#weight' => '1',
+    );
+
+    // Carga de actividades por ajax.
+    $form['field_proceso_plantilla']['widget']['#ajax'] = array(
+      'event' => 'change',
+      'callback' => 'procesosActividadesPlantillaAjax',
+      'wrapper' => 'actividades',
+      'progress' => [
+        'type' => 'throbber',
+        'message' => t('Cargando...'),
+      ]
+    );
+  }
+
+  // Editando tipo de contenido Procesos
+  if ($form_id == 'node_procesos_edit_form') {
+    //Desactiva la opcion de modificar Plantilla y Tipo de modificacion.
+    $form['field_proceso_plantilla']['#disabled'] = TRUE;
+    $form['field_tipo_modificaciones']['#disabled'] = TRUE;
+    unset($form['field_tipo_modificaciones']['widget']["#options"]['_none'] );
+  }
+
+  return $form;
+}
+
+/**
+ *  Funcion Ajax de actividades en creacion de procesos.
+ */
+function procesosActividadesPlantillaAjax($form, $form_state) {
+
+  $selectedValue = $form_state->getValue('field_proceso_plantilla');
+  $plantillaID = $selectedValue[0]['target_id'];
+
+  $view = Views::getView('actividades_plantilla_de_procesos');
+  $form['actividades-view'] = array(
+    '#title' => 'Actividades de la platilla',
+    '#type' => 'fieldset',
+    '#weight' => '1',
+    '#prefix' => '<div id="actividades">',
+    '#suffix' => '</div>',
+  );
+  $form['actividades-view']['view'] = $view->buildRenderable('block_2', [$plantillaID]);
+
+  return $form['actividades-view'];
+}
+
+/**
+* Implement clone function of activities of template
+*/
+function _clona_actividades_por_plantilla($plantillaEntity){
+
+  $fields = $plantillaEntity->getFields();
+  $field_proceso_actividades = $fields['field_act_procesos_hijos'];
+  $actividadesSinClonar = $field_proceso_actividades->getValue();
+
+  $actividadesClonadas = [] ;
+  foreach ($actividadesSinClonar as $key => $actividadID) {
+
+		$actividad = \Drupal::entityTypeManager()->getStorage('node')->load($actividadID['target_id']);
+    if (!empty($actividad)) {
+      $clone = $actividad->createDuplicate();
+      $clone->save();
+      $actividadesClonadas[] = $clone;
+    }
+
+  }
+  return $actividadesClonadas;
+
+}

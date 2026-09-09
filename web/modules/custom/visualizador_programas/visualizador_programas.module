@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Visualizador UPB module.
+ */
+
+
+/**
+ * Implements hook_theme().
+ */
+function visualizador_upb_theme($existing, $type, $theme, $path)
+{
+  return [
+    'visualizador_programas' => [
+      'render element' => 'children',
+      'template' => 'visualizador-programas',
+      'path' => $path . '/templates',
+      'variables' => [
+        'data' => [],
+      ],
+    ],
+  ];
+
+}

@@ -1,0 +1,30 @@
+<?php
+
+use Drupal\Core\Render\Markup;
+use Drupal\cron_alertas\Controller\CronAlertasController;
+/**
+ * Implements hook_mail().
+ */
+function cron_alertas_mail($key, &$message, $params) {
+  $options = array(
+    'langcode' => $message['langcode'],
+  );
+  switch ($key) {
+    case 'correo_alerta':
+      $message['subject'] = t('@subject', array('@subject' => $params['subject']), $options);
+      $message['body'][] = Markup::create($params['message']);
+      break;
+  }
+}
+
+/**
+ * Implements hook_cron().
+ *
+ */
+function cron_alertas_cron() {
+  if( date('G') == 8){ // At 8'o clock
+    $controller = new CronAlertasController;
+    $controller->ejecutarAlertasEstandar();
+    $controller->ejecutarAlertasEspeciales();
+  }
+}

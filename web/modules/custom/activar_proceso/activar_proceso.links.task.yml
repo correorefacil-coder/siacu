@@ -1,0 +1,11 @@
+activar_proceso.activar_proceso:
+  route_name: 'activar_proceso.activar_proceso'
+  title: 'Activar'
+  base_route: 'entity.node.canonical'
+  weight: 100
+
+activar_proceso.actualizar_proceso:
+  route_name: 'activar_proceso.actualizar_proceso'
+  title: 'Actualizar'
+  base_route: 'entity.node.canonical'
+  weight: 100

@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Views data export phpspreadsheet module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function views_data_export_phpspreadsheet_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the views export xlxs.
+    case 'help.page.views_data_export_phpspreadsheet':
+      return '<p>' . t('This module provides formats xlxs for views: For a full description of the module visit: <a href="https://www.drupal.org/project/views_data_export_phpspreadsheet">Data export phpspreadsheet</a>');
+
+    default:
+      break;
+
+  }
+}

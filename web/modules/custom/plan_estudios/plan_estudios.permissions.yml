@@ -1,0 +1,4 @@
+administer plan_estudios configuration:
+  title: 'Administer plan_estudios configuration'
+  description: 'Optional description.'
+  restrict access: true

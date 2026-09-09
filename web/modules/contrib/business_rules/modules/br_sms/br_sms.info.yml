@@ -1,0 +1,14 @@
+name: Business Rules - SMS Framework Integration
+type: module
+description: Provide a set of actions and conditions to work with SMS Framework module
+core_version_requirement: ^9 || ^10
+package: Workflow
+
+dependencies:
+  - business_rules:business_rules
+  - smsframework:sms
+
+# Information added by Drupal.org packaging script on 2024-01-26
+version: '3.0.0-beta1'
+project: 'business_rules'
+datestamp: 1706285593

@@ -1,0 +1,5 @@
+name: Integracion Documento Calidad
+type: module
+description: Integracion Documento Calidad
+package: Custom
+core_version_requirement: ^9 || ^10

@@ -1,0 +1,8 @@
+udn_clonar_actividades:
+  version: 1.x
+  js:
+    js/udn_clonar_actividades.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/jquery.once

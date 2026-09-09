@@ -1,0 +1,5 @@
+services:
+  asignaturas_sincro.commands:
+    class: \Drupal\asignaturas_sincro\Commands\AsignaturasSincroCommands
+    tags:
+      - { name: drush.command }

@@ -1,0 +1,43 @@
+/* Estilos para campos con error */
+.error-field {
+  border-color: #a51b00 !important;
+  box-shadow: 0 0 0 1px #a51b00 !important;
+}
+
+.error-field:focus {
+  border-color: #a51b00 !important;
+  box-shadow: 0 0 0 2px rgba(165, 27, 0, 0.25) !important;
+}
+
+/* Estilos para mensajes de error de campo */
+.field-error-message {
+  color: #a51b00;
+  font-size: 0.875em;
+  margin-top: 0.25em;
+  font-weight: 500;
+}
+
+/* Estilos para el contenedor de errores */
+.validacion-error-message {
+  margin-bottom: 1rem;
+}
+
+.validacion-error-message .messages__body ul {
+  margin: 0;
+  padding-left: 1.5em;
+}
+
+.validacion-error-message .messages__body li {
+  margin-bottom: 0.25em;
+}
+
+/* Animación para campos con error */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.error-field {
+  animation: shake 0.5s ease-in-out;
+}

@@ -1,0 +1,8 @@
+name: 'Finalizar Actividades'
+type: module
+description: 'This module provides an examples how to use Drupal local tasks'
+core_version_requirement: ^9 || ^10
+package: 'Custom'
+dependencies:
+  - activar_proceso
+  - node

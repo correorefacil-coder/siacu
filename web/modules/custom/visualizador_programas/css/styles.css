@@ -1,0 +1,17 @@
+#visualizador_table{
+  padding: 5px 10px 30px 10px;
+}
+
+#visualizador_chart{
+  padding: 5px 10px 30px 10px;
+}
+#visualizador_chart canvas{
+  margin: 50px 10px 30px 10px;
+}
+
+.visual_h5{
+  text-align: center;
+}
+table#tabla_upb{
+  font-size: 1em;
+}

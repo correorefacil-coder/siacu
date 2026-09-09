@@ -1,0 +1,13 @@
+{
+    "name": "drupal/dbug",
+    "type": "drupal-module",
+    "description": "Drupal version of ColdFusion's cfdump",
+    "keywords": ["Drupal"],
+    "homepage": "http://drupal.org/project/dbug",
+    "minimum-stability": "dev",
+    "support": {
+      "issues": "http://drupal.org/project/issues/dbug",
+      "source": "http://cgit.drupalcode.org/dbug"
+    },
+    "require": { }
+  }

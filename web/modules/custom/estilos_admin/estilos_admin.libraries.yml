@@ -1,0 +1,5 @@
+# Custom module library for general purposes.
+admin:
+  css:
+    component:
+      css/admin.css: {}

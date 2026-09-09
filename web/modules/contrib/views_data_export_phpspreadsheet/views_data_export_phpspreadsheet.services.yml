@@ -1,0 +1,10 @@
+services:
+  xls_serialization.encoder.xls:
+    class: Drupal\views_data_export_phpspreadsheet\Encoder\XlsEncoder
+    arguments: ['%app.root%', '@token', '@config.factory']
+    tags:
+      - { name: encoder, format: xls }
+  xls_serialization.xlssubscriber:
+    class: Drupal\views_data_export_phpspreadsheet\EventSubscriber\XlsSubscriber
+    tags:
+      - { name: event_subscriber }

@@ -1,0 +1,7 @@
+name: Clonar Actividades de Plantillas
+type: module
+description: Permite clonar actividades de una plantilla a un proceso
+package: Custom
+core_version_requirement: ^9 || ^10
+dependencies:
+  - node

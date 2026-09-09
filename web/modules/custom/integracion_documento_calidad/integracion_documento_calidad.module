@@ -1,0 +1,99 @@
+<?php
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\integracion_documento_calidad\Controller\IntegracionDocumentoCalidadController;
+use Drupal\node\Entity\Node;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function integracion_documento_calidad_node_insert(Node $node)
+{
+  if ($node->bundle() == 'plantillas') {
+    (new RedirectResponse('/node/' . ($node->id() . '/respuestaDrivePlantilla')))->send();
+    exit();
+  }
+  if ($node->bundle() == 'documentos_calidad') {
+    (new RedirectResponse('/node/' . ($node->id() . '/respuestaDriveDocumento')))->send();
+    exit();
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_form_alter().
+ */
+function integracion_documento_calidad_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id)
+{
+  $node = $form_state->getFormObject()->getEntity();
+  // SOLO PLANTILLAS NUEVAS
+  if (
+    $form_id == 'node_plantillas_form' ||
+    $form_id == 'node_documentos_calidad_form'
+  ) {
+
+    if ($node->getType() == 'plantillas') {
+      $form['#validate'][] = 'enviaArchivoPlantilla';
+    }
+    if ($node->getType() == 'documentos_calidad') {
+      $form['#validate'][] = 'enviaDataDocumentoCalidad';
+    }
+  }
+}
+
+function enviaArchivoPlantilla(&$form, FormStateInterface &$form_state)
+{
+  \Drupal::logger('integracion_documento_calidad')->error('enviaArchivoPlantilla');
+  $node = $form_state->getFormObject()->getEntity();
+  $trigger = $form_state->getTriggeringElement();
+  if (empty($node->id()) && !empty($trigger)) {
+    if ($trigger['#type'] == 'submit' && $trigger['#name'] != 'field_plantilla_word_0_upload_button') {
+      $controller = new IntegracionDocumentoCalidadController;
+      $controller->crearPlantillaDocCalidadDrive($form_state);
+    }
+  }
+}
+
+function enviaDataDocumentoCalidad(&$form, FormStateInterface $form_state)
+{
+  \Drupal::logger('integracion_documento_calidad')->error('enviaDataDocumentoCalidad');
+  $node = $form_state->getFormObject()->getEntity();
+  $trigger = $form_state->getTriggeringElement();
+  if (empty($node->id()) && !empty($trigger)) {
+    if ($trigger['#type'] == 'submit') {
+      $controller = new IntegracionDocumentoCalidadController;
+      $form_state = $controller->crearDocumentoCalidadDrive($form_state);
+    }
+  }
+}
+
+function integracion_documento_calidad_menu_local_tasks_alter(&$data,$route_name,&$cacheability) {
+ $cacheability
+    ->addCacheContexts([
+    'user.permissions',
+    'url',
+  ]);
+  $route_match = \Drupal::routeMatch();
+  if (
+    $route_match->getRouteName() == 'entity.node.canonical' ||
+    $route_match->getRouteName() == 'entity.node.latest_version' ||
+    $route_match->getRouteName() == 'entity.node.edit_form'
+  ) {
+    $node = $route_match->getParameter('node');
+    if($node->bundle()!='documentos_calidad') {
+      unset($data['tabs'][0]['integracion_documento_calidad.finalizarDocumentoCalidadDrive']);
+      unset($data['tabs'][0]['integracion_documento_calidad.reactivarDocumentoCalidadDrive']);
+    }else{
+      $controller = new IntegracionDocumentoCalidadController;
+      $estado = $controller->getEstadoDocumento($node);
+      switch ($estado) {
+        case 'En edición':
+          unset($data['tabs'][0]['integracion_documento_calidad.reactivarDocumentoCalidadDrive']);
+          break;
+        case 'Finalizado':
+          unset($data['tabs'][0]['integracion_documento_calidad.finalizarDocumentoCalidadDrive']);
+          break;
+      }
+    }
+  }
+}

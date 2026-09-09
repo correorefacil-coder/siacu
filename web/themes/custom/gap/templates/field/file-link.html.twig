@@ -1,0 +1,41 @@
+{#
+/**
+ * @file
+ * Theme override for a link to a file.
+ *
+ * Available variables:
+ * - attributes: The HTML attributes for the containing element.
+ * - link: A link to the file.
+ * - icon: The icon image representing the file type.
+ *
+ * @see template_preprocess_file_link()
+ */
+#}
+{{ attach_library('bootstrap_barrio/file') }}
+<span{{ attributes }}>{{ icon }} {{ link }}</span>
+
+{% if ext == 'pdf' %}
+  <div class="container-iframe">
+    <iframe allowfullscreen class="responsive-iframe" src="/libraries/viewerjs/ViewerJS/#{{ uri }}" frameborder="0"></iframe>
+  </div>
+{% endif %}
+
+{% if ext == 'jpg' or ext == 'jpeg' or ext == 'gif' or ext == 'png' %}
+  <img src="{{ uri }}" width="100%" >
+{% endif %}
+
+{% if ext == 'docx' %}
+  <script src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx-preview-lib@0.1.14-fix-3/dist/docx-preview.min.js"></script>
+  <div class="container-docx" id="containerDoc"></div>
+  <script>
+    window.onload = function() {
+      var docData = fetch('{{ uri }}').then(r => r.blob());
+      var container = document.getElementById("containerDoc");
+      console.log(container);
+      //var docData = '{{ uri }}';
+      docx.renderAsync(docData, container)
+        .then(x => console.log("docx: finished"));
+    }
+  </script>
+{% endif %}

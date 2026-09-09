@@ -1,0 +1,9 @@
+reporte_historico_programas.reporte_historico_programa:
+  route_name: 'reporte_historico_programas.reporte_programa'
+  title: 'Reporte historico'
+  base_route: 'entity.node.canonical'
+  weight: 100
+  options:
+    attributes:
+      target: '_blank'
+

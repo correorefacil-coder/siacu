@@ -1,0 +1,526 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Plan estudios module.
+ */
+use Drupal\node\Entity\Node;
+use Drupal\paragraphs\Entity\Paragraph;
+use Drupal\taxonomy\Entity\Term;
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function plan_estudios_menu_local_tasks_alter(&$data, $route_name, &$cacheability)
+{
+  $cacheability
+    ->addCacheContexts([
+      'user.permissions',
+      'url',
+    ]);
+  $route_match = \Drupal::routeMatch();
+  if (
+    $route_match->getRouteName() == 'entity.node.latest_version' ||
+    $route_match->getRouteName() == 'entity.node.edit_form'
+  ) {
+    $node = $route_match->getParameter('node');
+    if ($node->bundle() == 'plan_estudios') {
+      unset($data['tabs'][0]['plan_estudios.reporte']);
+    }
+  }
+}
+
+/**
+ * Implement hook_entity_insert
+ */
+function plan_estudios_node_insert($entity)
+{
+  custom_var_dump('plan_estudios_node_insert');
+  check_import_asignaturas_planes_estudio_programa($entity);
+}
+
+/**
+ * Implement hook_entity_update
+ */
+function plan_estudios_node_update($entity)
+{
+  custom_var_dump('plan_estudios_node_update');
+  check_import_asignaturas_planes_estudio_programa($entity);
+}
+
+function check_import_asignaturas_planes_estudio_programa(&$entity){
+  if ($entity->getEntityType()->id() == 'node') {
+    $log = $entity->revision_log->value;
+    if (!empty($log)) {
+      if (substr($log, 0, 16) === "AUTOMATED-UPDATE")
+        return;
+    }
+  }
+
+  $entityContentType = $entity->getType();
+  switch ($entityContentType) {
+    case 'programas_academicos':
+      return import_asignaturas_planes_estudio_programa($entity);
+
+    case 'plan_estudios':
+      return import_asignaturas_planes_estudio($entity);
+  }
+}
+
+function import_asignaturas_planes_estudio($plan_estudio)
+{
+  custom_var_dump('-import_asignaturas_planes_estudio');
+  importacion_asignaturas_plan_estudio($plan_estudio);
+}
+
+function import_asignaturas_planes_estudio_programa($programa)
+{
+  custom_var_dump('-import_asignaturas_planes_estudio_programa');
+  if (!$programa->field_planes_estudios->isEmpty()) {
+    $planes_estudios = $programa->field_planes_estudios->getValue();
+    foreach ($planes_estudios as $plan_estudio_id) {
+      $plan_estudio = Node::load($plan_estudio_id['target_id']);
+      importacion_asignaturas_plan_estudio($plan_estudio, $programa);
+    }
+  }
+}
+
+/**
+ * Function importacion_asignaturas_plan_estudio
+ *
+ * @param object $plan_estudio
+ * @param string $type
+ */
+function importacion_asignaturas_plan_estudio(&$plan_estudio, &$programa = null)
+{
+  custom_var_dump('--importacion_asignaturas_plan_estudio');
+  // SI NO TIENE ARCHIVO NO SE REALIZA NADA
+  if (!$plan_estudio->field_plan_estudios_asignat_file->isEmpty()) {
+    // SI TIENE ID ARCHIVO ANTERIOR, ES UPDATE SINO ES NEW
+    if ($plan_estudio->field_archivo_anterior->isEmpty()) {
+      // NEW
+      batch_importacion_asignaturas_plan_estudio($plan_estudio, $programa);
+    } else {
+      // UPDATE
+      $field_archivo_anterior = $plan_estudio->field_archivo_anterior->getValue();
+      $archivo_anterior = $field_archivo_anterior[0]['value'];
+      $new_fid = $plan_estudio->field_plan_estudios_asignat_file->getValue();
+      $archivo_nuevo = $new_fid[0]['target_id'];
+      if ($archivo_anterior != $archivo_nuevo) {
+        batch_importacion_asignaturas_plan_estudio($plan_estudio, $programa);
+      }
+    }
+  }
+}
+
+/**
+ * Function batch_importacion_asignaturas_plan_estudio
+ *
+ * @param object $plan_estudio
+ * @param object $programa
+ */
+function batch_importacion_asignaturas_plan_estudio(&$plan_estudio, &$programa)
+{
+  custom_var_dump('---batch_importacion_asignaturas_plan_estudio');
+
+  $uri = $plan_estudio->field_plan_estudios_asignat_file->entity->getFileUri();
+  $path_csv = \Drupal::service('file_system')->realpath($uri);
+  $rows = array_map('str_getcsv', file($path_csv));
+
+  // OBTENEMOS PLAN ORIGINAL Y ENFASIS
+  $planes_asignaturas = array();
+  foreach ($rows as $key => $row) {
+    if ($key > 0) {
+      $field_plan_estudios_per_efec = $plan_estudio->field_plan_estudios_per_efec->getValue();
+      $periodo_efectivo  = $field_plan_estudios_per_efec[0]['value'];
+      if (empty($row[11])) {
+        // ASIGNATURAS DEL PLAN DE ESTUDIO SIN ENFASIS
+        $planes_asignaturas['original']['asignaturas'][] = $row;
+        $planes_asignaturas['original']['titulo'] = $plan_estudio->getTitle();
+        $planes_asignaturas['original']['periodo_efectivo'] = $periodo_efectivo;
+      } else {
+      // ASIGNATURAS DEL PLAN DE ESTUDIO CON ENFASIS
+        $planes_asignaturas[$row[11]]['asignaturas'][] = $row;
+        $planes_asignaturas[$row[11]]['titulo'] = $plan_estudio->getTitle().' - '.$row[11];
+        $planes_asignaturas[$row[11]]['periodo_efectivo'] = $periodo_efectivo;
+      }
+      // ASIGNATURAS PARA PROCESADO DE REGLAS
+    }
+  }
+  $operations = array();
+
+  ///////// 1. OPERACION DE CREACION PLANES SI NO EXISTEN /////////
+  foreach ($planes_asignaturas as $enfasis => $info_enfasis) {
+    if ($enfasis == 'original') {
+      // ORIGINAL
+      $operations[] = array('crear_plan_estudio_original', array($plan_estudio, $info_enfasis));
+    }else{
+      // ENFASIS
+      $operations[] = array('crear_plan_estudio_enfasis', array($plan_estudio, $enfasis, $info_enfasis));
+    }
+  }
+
+  ///////// 2. OPERACION DE ASOCIACION ASIGNATURAS EN LOS PLANES /////////
+  foreach ($planes_asignaturas as $enfasis => $info_enfasis) {
+    foreach ($info_enfasis['asignaturas'] as $key => $asignatura) {
+      if ($enfasis != 'original') {
+        // PROCESA UNA SOLA VEZ LA ASIGNATURA (ORIGINAL)
+        $operations[] = array('seleccionar_asignatura_plan_estudio', array($enfasis, $asignatura));
+      }else{
+        // PROCESA MULTIPLES VECES VEZ LA ASIGNATURA (ORIGINAL Y ENFASIS)
+        foreach ($planes_asignaturas as $enfasis_interno => $info_enfasis_interno) {
+          $operations[] = array('seleccionar_asignatura_plan_estudio', array($enfasis_interno, $asignatura));
+        }
+      }
+    }
+  }
+
+  ///////// 3. OPERACION DE ASOCIACION DE PLANES ENFASIS CON PROGRAMA ACADEMICO /////////
+  if (!empty($programa)) {
+    foreach ($planes_asignaturas as $enfasis => $info_enfasis) {
+      if ($enfasis != 'original') {
+        // SELECCIONA UNA SOLA VEZ LA ASIGNATURA (ORIGINAL)
+        $operations[] = array('asociar_plan_estudio_programa', array($enfasis, $programa));
+      }
+    }
+  }
+
+  ///////// 4. OPERACION DE ASOCIACION REGLAS ELECTIVAS EN LOS PLANES /////////
+  foreach ($planes_asignaturas as $enfasis => $info_enfasis) {
+    foreach ($info_enfasis['asignaturas'] as $key => $asignatura) {
+      $operations[] = array('asociar_regla_plan_estudio_electiva', array($asignatura));
+    }
+  }
+
+  // CIERRE PROCESO IMPORTACION
+  $operations[] = array('cerrar_plan_estudio', array($plan_estudio));
+
+  //$operations[] = array('check_context', array());
+
+  // IMPORTACION PLANES ENFASIS
+  $batch = array(
+    'title' => 'Procesando archivo de Planes de estudio',
+    'operations' => $operations,
+    'progress_message' => 'Paso @current de @total.',
+    'finished' => 'finalizar_importacion_asignaturas',
+    'progressive' => TRUE,
+  );
+  batch_set($batch);
+}
+
+function cerrar_plan_estudio(&$plan_estudio, &$context){
+  $plan_estudio = Node::load($plan_estudio->id());
+  $context['message'] = 'Cerrando Plan de estudio "' . $plan_estudio->getTitle() . '".';
+  $new_fid = $plan_estudio->field_plan_estudios_asignat_file->getValue();
+  $archivo_nuevo = $new_fid[0]['target_id'];
+  $plan_estudio->field_archivo_anterior->setValue($archivo_nuevo);
+  $plan_estudio->setNewRevision(TRUE);
+  $plan_estudio->revision_log->value = "AUTOMATED-UPDATE Cierre Proceso";
+  $plan_estudio->save();
+}
+
+function asociar_plan_estudio_programa($enfasis, &$programa, &$context){
+  if (!empty($context['results']['planes'][$enfasis]['id'])) {
+
+    $plan_estudio_id = $context['results']['planes'][$enfasis]['id'];
+    $programa = Node::load($programa->id());
+
+    // BUSCA ASOCIACION ANTERIOR
+    $planes_estudios_cargados = $programa->field_planes_estudios->getValue();
+    foreach ($planes_estudios_cargados as $key => $plan_estudio_cargado) {
+      if ($plan_estudio_cargado['target_id'] == $plan_estudio_id) {
+        timerslow();
+        return;
+      }
+    }
+
+    // REALIZA ASOCIACION
+    $plan_estudio = Node::load($plan_estudio_id);
+    $context['message'] = 'Asociando Plan de estudio "' . $plan_estudio->getTitle() . '" al Programa "' . $programa->getTitle() . '".';
+    $programa->field_planes_estudios[] = $plan_estudio;
+    $programa->save();
+    timerslow();
+    return;
+  }
+}
+
+function seleccionar_asignatura_plan_estudio($enfasis, $asignatura, &$context){
+  $plan_estudio_id = $context['results']['planes'][$enfasis]['id'];
+  $plan_estudio = Node::load($plan_estudio_id);
+  $context['results']['rows_imported']++;
+  $context['results']['conteo_asignaturas']++;
+  $context['message'] =  'Asociando Asignatura: ' . $asignatura[6] . ' ' . $asignatura[7] . ' ' . $asignatura[8] . ' al Plan de estudio: ' . $plan_estudio->getTitle();
+
+  $asignatura_id = _busca_asignatura($asignatura[6], $asignatura[7], $asignatura[8]);
+
+  $bloque_academico = get_bloque_academico_plan_estudio_semestre($plan_estudio, $asignatura, $asignatura_id);
+  $asignaturas_cargadas = $bloque_academico->field_plan_estudios_asig_seme->getValue();
+
+  // BUSCA ASOCIACION ANTERIOR
+  foreach ($asignaturas_cargadas as $key => $asignatura_cargada) {
+    if ($asignatura_cargada['target_id'] == $asignatura_id) {
+      timerslow();
+      return;
+    }
+  }
+
+  // REALIZA ASOCIACION
+  if (!empty($asignatura_id) && !empty($bloque_academico)) {
+    // BATCH ASOCIACION BLOQUE ACADEMICO A PLAN ESTUDIO
+    $asignatura = Node::load($asignatura_id);
+    $bloque_academico->field_plan_estudios_asig_seme->appendItem($asignatura);
+    $bloque_academico->save();
+  } else if (empty($bloque_academico)) {
+    $key = $context['results']['conteo_asignaturas'];
+    $msg = "Fila $key mensaje-- " .
+      "Verifique que el nombre ingresado en la columna semestre " .
+      "exista en la tabla maestra o este bien escrito. \n" .
+      "Una vez corregido, vuelva a cargar el archivo solo con este cambio. --";
+    $asignatura[6] . ' ' . $asignatura[7] . ' ' . $asignatura[8];
+    \Drupal::messenger()->addError($msg);
+  } else {
+    $key++;
+    $msg = 'Fila ' . $key . ' -- ' . 'Error al buscar la asignatura -- ' .
+      $asignatura[6] . ' ' . $asignatura[7] . ' ' . $asignatura[8];
+    \Drupal::messenger()->addError($msg);
+  }
+  timerslow();
+  return;
+}
+
+function crear_plan_estudio_original($plan_estudio, $info_enfasis, &$context)
+{
+  $context['message'] = 'Creando Plan de estudios: ' . $info_enfasis['titulo'];
+  $context['results']['rows_imported'] = 0;
+  $context['results']['conteo_asignaturas'] = 0;
+  $context['results']['planes']['original']['id'] = $plan_estudio->id();
+  $context['results']['planes']['original']['asignaturas'] = $info_enfasis['asignaturas'];
+  timerslow();
+  return;
+}
+
+function crear_plan_estudio_enfasis($plan_estudio, $enfasis, $info_enfasis, &$context)
+{
+  $context['message'] = 'Creando Plan de estudios: ' . $info_enfasis['titulo'];
+  $plan_estudio_enfasis_id = _busca_plan($info_enfasis['titulo'], $info_enfasis['periodo_efectivo']);
+  if (empty($plan_estudio_enfasis_id)) {
+    $plan_estudio_enfasis_id = _crea_plan($info_enfasis['titulo'], $info_enfasis['periodo_efectivo']);
+  }
+  $context['results']['planes'][$enfasis]['id'] = $plan_estudio_enfasis_id;
+  $context['results']['planes'][$enfasis]['contador'] = $info_enfasis;
+  $context['results']['planes'][$enfasis]['asignaturas'] = $info_enfasis;
+  timerslow();
+  return;
+}
+
+function check_context(&$context){
+  dd($context);
+}
+
+function custom_var_dump($obj)
+{
+  //echo '<pre>'; var_dump($obj); echo '</pre>';
+}
+
+/**
+ * Function _busca_plan
+ * @param string $titulo
+ *
+ * @return int $nid
+ */
+function _busca_plan($titulo, $periodo_efectivo)
+{
+  custom_var_dump('-----_busca_plan');
+  if (!empty($titulo)) {
+    $query = \Drupal::entityQuery('node');
+    $query->condition('status', 1);
+    $query->condition('type', 'plan_estudios');
+    $query->condition('field_plan_estudios_per_efec', "$periodo_efectivo");
+    $query->condition('title', $titulo);
+    $query->range(0, 1);
+    $asignatura = $query->execute();
+    return reset($asignatura);
+  }
+  return 0;
+}
+
+/**
+ * Function _busca_plan
+ * @param string $titulo
+ *
+ * @return int $nid
+ */
+function _crea_plan($titulo, $periodo_efectivo)
+{
+  $plan_estudio = Node::create(['type' => 'plan_estudios']);
+  $plan_estudio->enforceIsNew();
+  $plan_estudio->status = 1;
+  $plan_estudio->field_plan_estudios_per_efec = "$periodo_efectivo";
+  $plan_estudio->set('title', $titulo);
+  $plan_estudio->save();
+  return $plan_estudio->id();
+}
+
+/**
+ * Function _busca_asignatura
+ * @param string $materia
+ * @param int $curso
+ * @param int $periodo_efect
+ *
+ * @return int $nid
+ */
+function _busca_asignatura($materia, $curso, $periodo_efect)
+{
+  if (!empty($materia) && !empty($curso) && !empty($periodo_efect)) {
+    $query = \Drupal::entityQuery('node');
+    $query->condition('status', 1);
+    $query->condition('type', 'szvcata');
+    $query->condition('field_curso', $curso);
+    $query->condition('field_materia', $materia);
+    //$query->condition('field_periodo_efectivo', $periodo_efect);
+    $query->range(0, 1);
+    $asignatura = $query->execute();
+    return reset($asignatura);
+  }
+  return 0;
+}
+
+function get_bloque_academico_plan_estudio_semestre(&$plan_estudio, $datos, $asignatura_id)
+{
+  custom_var_dump('-----get_bloque_academico_plan_estudio_semestre');
+  $bloques_ids = $plan_estudio->field_plan_estudios_asignaturas->getValue();
+  // BUSCA SI EXISTE Y RETORNA
+  foreach ($bloques_ids as $key => $bloque_id) {
+    $bloque = Paragraph::load($bloque_id['target_id']);
+    if (
+      !$bloque->field_semestre->isEmpty() &&
+      !$bloque->field_plan_estudios_asig_seme->isEmpty()
+    ) {
+      $field_semestre = $bloque->field_semestre->getValue();
+      $asignatura_sem_id = $bloque->field_plan_estudios_asig_seme->getValue();
+      $semestre = Term::load($field_semestre[0]['target_id']);
+      if (
+        $semestre->getName() == $datos[0] &&
+        $asignatura_sem_id[0]['target_id'] == $asignatura_id
+      ) {
+        return $bloque;
+      }
+    }
+  }
+
+  // SI NO EXISTE LO CREA
+  $query = \Drupal::entityQuery('taxonomy_term')
+    ->condition('vid', 'bloque_academico')
+    ->condition('name', $datos[0])
+    ->range(0, 1);
+  $semestre_id = $query->execute();
+  $semestre_id = reset($semestre_id);
+  $asignatura = Node::load($asignatura_id);
+
+  $bloque = Paragraph::create([
+    'type' => 'bloque_academico',
+    'field_plan_estudios_asig_seme' => $asignatura,
+    'field_semestre' => array('target_id' => $semestre_id),
+    'field_plan_estudios_area' => $datos[1],
+    'field_plan_estudios_flexibilidad' => $datos[2],
+    'field_plan_estudios_keys' => $datos[3],
+    'field_plan_estudios_descripcion' => $datos[4],
+    'field_plan_estudios_observacione' => $datos[5],
+  ]);
+  $bloque->save();
+
+  $plan_estudio->field_plan_estudios_asignaturas->appendItem($bloque);
+  $plan_estudio->setNewRevision(TRUE);
+  $plan_estudio->revision_log->value = "AUTOMATED-UPDATE Adicion de asignatura";
+  $plan_estudio->save();
+
+  \Drupal::messenger()->addStatus('Bloque creado:' . $datos[0]);
+  return $bloque;
+}
+
+
+function asociar_regla_plan_estudio_electiva($asignatura, &$context)
+{
+  $context['message'] = 'Creando Regla Plan de estudios: ' . $asignatura[8] . '-' . $asignatura[6] . $asignatura[7];
+  $asignatura_id = _busca_asignatura($asignatura[6], $asignatura[7], $asignatura[8]);
+
+  if (!empty($asignatura_id)) {
+
+    $plan_estudio_id = $context['results']['planes']['original']['id'];
+    $plan_estudio = Node::load($plan_estudio_id);
+
+    $asignatura_node = Node::load($asignatura_id);
+    if (!empty($asignatura_node)) {
+      $asignatura_titulo = $asignatura_node->getTitle();
+      timerSlow();
+      if (strpos($asignatura_titulo, 'ELECTIVA')) {
+        $regla = _procesa_regla_plan_estudio_electiva($asignatura_node);
+        $plan_estudio->field_regla[] = $regla;
+        $plan_estudio->setNewRevision(TRUE);
+        $plan_estudio->revision_log->value = "AUTOMATED-UPDATE Adicion de Regla";
+        $plan_estudio->save();
+      }
+    }
+  }
+}
+
+function _procesa_regla_plan_estudio_electiva($asignatura_node)
+{
+  custom_var_dump('-----_procesa_regla_plan_estudio_electiva');
+
+  $asignatura_titulo = $asignatura_node->getTitle();
+  $regla_titulo = 'Electiva - ' . $asignatura_titulo;
+
+  // BUSCA LA REGLA SI EXISTE
+  $regla_id = _busca_regla($regla_titulo);
+
+  if (empty($regla_id)) {
+    $regla = Node::create(['type' => 'reglas_programa']);
+    $regla->enforceIsNew();
+    $regla->status = 1;
+    $regla->field_reglas_electiva_enfasis = 'Electiva';
+    $regla->title = $regla_titulo;
+    $regla->field_prog_materia[] = $asignatura_node;
+  } else {
+    $regla = Node::load($regla_id);
+    $regla->field_prog_materia[] = $asignatura_node;
+  }
+  $regla->save();
+  timerSlow();
+  \Drupal::messenger()->addStatus('Regla creada:' . $regla_titulo);
+  return $regla;
+}
+
+function _busca_regla($titulo)
+{
+  custom_var_dump('-----_busca_regla');
+  if (!empty($titulo)) {
+    $query = \Drupal::entityQuery('node');
+    $query->condition('status', 1);
+    $query->condition('type', 'reglas_programa');
+    $query->condition('title', $titulo);
+    $query->range(0, 1);
+    $asignatura = $query->execute();
+    return reset($asignatura);
+  }
+  return 0;
+}
+
+function timerSlow()
+{
+  usleep(0.1 * 1000000);
+}
+
+/**
+ * Implements hook_theme().
+ */
+function plan_estudios_theme($existing, $type, $theme, $path) {
+  return [
+    'my_template' => [
+      'variables' => [
+        'titulos' => NULL,
+        'variables' => NULL,
+      ],
+    ],
+  ];
+}

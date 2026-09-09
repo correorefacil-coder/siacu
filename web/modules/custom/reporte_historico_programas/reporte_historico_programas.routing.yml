@@ -1,0 +1,14 @@
+reporte_historico_programas.reporte:
+  path: '/reporte-historico-programas'
+  defaults:
+    _title: 'Reporte'
+    _controller: '\Drupal\reporte_historico_programas\Controller\ReporteHistoricoProgramasController::reporte'
+  requirements:
+    _access: 'TRUE'
+reporte_historico_programas.reporte_programa:
+  path: '/reporte-historico-programas/{node}'
+  defaults:
+    _title: 'Reporte por Programa'
+    _controller: '\Drupal\reporte_historico_programas\Controller\ReporteHistoricoProgramasController::reporte'
+  requirements:
+    _access: 'TRUE'

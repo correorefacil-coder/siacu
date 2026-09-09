@@ -1,0 +1,9 @@
+administer asignaturas_sincro configuration:
+  title: 'Administer asignaturas_sincro configuration'
+  description: 'Optional description.'
+  restrict access: true
+
+sincro asignaturas_sincro configuration:
+  title: 'Sync asignaturas_sincro configuration'
+  description: 'Optional description.'
+  restrict access: true

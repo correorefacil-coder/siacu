@@ -1,0 +1,83 @@
+<?php
+
+use \Drupal\node\Entity\Node;
+
+/**
+* Implement hook_entity_presave
+*/
+function udn_clonar_calificaciones_globales_entity_presave($entity){
+
+  // Check entidad de tipo Nodo
+  if ($entity->getEntityType()->id() != 'node') {
+    return;
+  }
+
+  $id = $entity->id();
+  $type = $entity->getType();
+
+  // NUEVO
+  if (!empty($id)) {
+    return;
+  }
+
+  // Check Nodo tipo Procesos
+  if ($type != 'procesos') {
+    return;
+  }
+  // Obtencion de ID de plantilla
+  $plantillaID = null;
+  $plantillaEntity = null;
+  if (isset($entity->field_proceso_plantilla[0])) {
+    $plantillaID = $entity->field_proceso_plantilla[0]->getValue();
+    $plantillaID = $plantillaID['target_id'];
+    $plantillaEntity = \Drupal::entityTypeManager()->getStorage('node')->load($plantillaID);
+    $plantillaID = $plantillaEntity->id();
+  }
+
+  // Control si no hay plantilla seleccionada.
+  if (empty($plantillaID)){
+    return;
+  }
+
+
+  if (!empty($plantillaEntity->field_plantilla_calificacion_glo[0])) {
+    $plantillaCalificacionGlobal = $plantillaEntity->field_plantilla_calificacion_glo[0]->getValue();
+    //////// Clonacion de plantillas ////////
+    $plantillaCalificacionGlobalID = $plantillaCalificacionGlobal["target_id"];
+    $plantillaEntityCalificacion = \Drupal::entityTypeManager()->getStorage('node')->load($plantillaCalificacionGlobalID);
+    $calificacionClonadas = _clona_calificaciones_globales($entity,$plantillaEntityCalificacion);
+    $entity->set('field_calificacion_global', $calificacionClonadas);
+
+  }
+
+  return;
+
+}
+
+/**
+* Implement clone function of activities of template
+*/
+function _clona_calificaciones_globales($entity,$plantillaEntityCalificacion){
+
+  $calificacionesGlobales = $plantillaEntityCalificacion->get("field_calificaciones_globales");
+  $values = $calificacionesGlobales->getValue();
+  //$clone = $plantillaEntityCalificacion->createDuplicate();
+  $calificacionesGlobalesClonados = [];
+  foreach ($values as $key => $value) {
+    $factor = \Drupal::entityTypeManager()->getStorage('paragraph')->load($value["target_id"]);
+    $factorClone = $factor->createDuplicate();
+    $factorClone->save();
+    $calificacionesGlobalesClonados[] =  [
+      'target_id' => $factorClone->id(),
+      'target_revision_id' => $factorClone->getRevisionId(),
+    ];
+  }
+
+  $newNode = Node::create(['type' => 'calificacion_global']);
+  $newNode->set('title', "Calificacion-Global-".$entity->getTitle());
+  $newNode->set('field_calificaciones_globales', $calificacionesGlobalesClonados);
+  $newNode->save();
+
+  return $newNode;
+
+}

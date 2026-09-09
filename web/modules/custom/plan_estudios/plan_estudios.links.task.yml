@@ -1,0 +1,6 @@
+plan_estudios.reporte:
+  route_name: 'plan_estudios.reporte'
+  title: 'Malla Curricular'
+  base_route: 'entity.node.canonical'
+  weight: 100
+

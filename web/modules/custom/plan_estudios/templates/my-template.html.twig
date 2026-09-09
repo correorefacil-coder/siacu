@@ -1,0 +1,341 @@
+{%
+  set classes = {
+    'Formación Básica' : 'bg-yellow ',
+    'Formación Básica Profesional' : 'bg-red ',
+    'Formación Profesional' : 'bg-blue ',
+    'Fundamentación' : 'bg-green ',
+    'Formación específica' : 'bg-brown ',
+    'Investigación' : 'bg-purple ',
+    'Electiva' : 'bg-orange'
+  }
+%}
+
+{% set asignaturas = variables.lista_asignaturas %}
+<style>
+    @page {
+      margin: 0cm 1cm;
+    }
+
+    body {
+      font-family: sans-serif;
+      font-size: 12px;
+    }
+
+    table {
+      border-collapse: collapse;
+      font-size: 9px;
+      width: 100%;
+    }
+
+    table thead tr th {
+      font-size: 16px;
+      font-weight: bolder;
+      text-align: center;
+    }
+
+    table thead tr th img {
+      vertical-align: middle;
+      width: 450px;
+    }
+
+    table tbody tr td {
+      text-align: center;
+    }
+
+    table tbody tr.align-left td {
+      text-align: left;
+    }
+
+    table tr th{
+      background: lightgray;
+    }
+    table tbody tr td.head {
+      background-color: lightgray;
+      border: 1px solid black;
+      font-size: 12px;
+      font-weight: bolder;
+      padding: 5px 0;
+    }
+
+    .b-top {
+      border-top: 1px solid black;
+    }
+
+    .b-bottom {
+      border-bottom: 1px solid black;
+    }
+
+    .b-left {
+      border-left: 1px solid black;
+    }
+
+    .b-right {
+      border-right: 1px solid black;
+    }
+
+    .bg-green {
+      background-color: rgb(153, 255, 161);
+    }
+
+    .bg-brown {
+      background-color: rgb(193, 116, 79);
+    }
+
+    .bg-purple {
+      background-color: rgb(212, 57, 193);
+    }
+
+    .bg-yellow {
+      background-color: rgb(255, 255, 153);
+    }
+
+    .bg-red {
+      background-color: rgb(230, 69, 65);
+    }
+
+    .bg-blue {
+      background-color: rgb(0, 176, 240);
+    }
+
+    .bg-violet {
+      background-color: rgb(204, 192, 218);
+    }
+
+    .bg-orange {
+      background-color: rgb(255,204,128);
+    }
+
+    .bg-ligthgreen {
+      background-color: rgb(174,213,129);
+    }
+
+    .rules {
+      line-height: 8px;
+    }
+  </style>
+
+<table>
+  <thead>
+    <tr>
+      <th colspan="50">
+        <img src="/themes/custom/gap/logo.svg" alt="Inicio" class="img-fluid d-inline-block align-top">
+      </th>
+    </tr>
+    <tr>
+      <th colspan="50">&nbsp;</th>
+    </tr>
+    <tr>
+      <th colspan="50">
+        Plan de Estudios Propuesto por Componentes Curriculares - {{ variables.title }}
+      </th>
+    </tr>
+    <tr>
+      <th colspan="50">&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      {% for titulo in titulos %}
+        <td>&nbsp;</td>
+        <td colspan="5" class="head">{{titulo}}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td colspan="50">&nbsp;</td>
+    </tr>
+    <tr>
+      {% for asignatura in asignaturas %}
+        <td>&nbsp;</td>
+        <td colspan="5" class="{{classes[asignatura.area]}} b-top b-bottom b-left b-right">
+        {{asignatura.titulo}}
+        </td>
+      {% endfor %}
+    </tr>
+    <tr>
+      {% for asignatura in asignaturas %}
+        <td>&nbsp;</td>
+        <td rowspan="2" class="{{classes[asignatura.area]}} b-bottom b-left">{{asignatura.materia}}</td>
+        <td class="{{classes[asignatura.area]}} b-bottom b-left">HTI</td>
+        <td class="{{classes[asignatura.area]}} b-bottom b-left">HT</td>
+        <td class="{{classes[asignatura.area]}} b-bottom b-left">HP</td>
+        <td class="{{classes[asignatura.area]}} b-bottom b-left b-right">Cre</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      {% for asignatura in asignaturas %}
+        <td>&nbsp;</td>
+        <td class="{{classes[asignatura.area]}} b-bottom b-right">{{asignatura.hti}}</td>
+        <td class="{{classes[asignatura.area]}} b-bottom b-right">{{asignatura.ht}}</td>
+        <td class="{{classes[asignatura.area]}} b-bottom b-right">{{asignatura.hl}}</td>
+        <td class="{{classes[asignatura.area]}} b-bottom b-right">{{asignatura.cre_acad}}</td>
+      {% endfor %}
+    </tr>
+    <tr class="rules">
+      {% for asignatura in asignaturas %}
+        <td>&nbsp;</td>
+        {% if asignatura.regla.0.nombre %}
+          <td colspan="5" class="bg-ligthgreen b-bottom b-left b-right">{{asignatura.regla.0.nombre}}</td>
+        {% else %}
+          <td colspan="5" class="b-bottom b-left b-right">&nbsp;</td>
+        {% endif %}
+
+      {% endfor %}
+    </tr>
+
+    <tr>
+      {% for asignatura in asignaturas %}
+        <td>&nbsp;</td>
+        <td colspan="5" class="b-top b-bottom b-left b-right">TOTALES</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      {% for asignatura in asignaturas %}
+        <td>&nbsp;</td>
+        <td rowspan="2" class=" b-bottom b-left">&nbsp;</td>
+        <td class=" b-bottom b-left">HTI</td>
+        <td class=" b-bottom b-left">HT</td>
+        <td class=" b-bottom b-left">HP</td>
+        <td class=" b-bottom b-left b-right">Cre</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      {% for asignatura in asignaturas %}
+        <td>&nbsp;</td>
+        <td class=" b-bottom b-right">{{asignatura.hti}}</td>
+        <td class=" b-bottom b-right">{{asignatura.ht}}</td>
+        <td class=" b-bottom b-right">{{asignatura.hl}}</td>
+        <td class=" b-bottom b-right">{{asignatura.cre_acad}}</td>
+      {% endfor %}
+    </tr>
+
+    <tr>
+    <td>&nbsp;</td>
+    <td colspan="15" class="b-left b-top b-right b-bottom">CONVENCIONES</td>
+    </tr>
+    <tr>
+    <td>&nbsp;</td>
+    <td colspan="9" class="b-left b-top b-right b-bottom">ÁREA</td>
+    <td>&nbsp;</td>
+    <td colspan="5" class="b-left b-top b-right b-bottom">ASIGNATURA</td>
+    <td colspan="35">&nbsp;</td>
+    </tr>
+    <tr>
+    <td>&nbsp;</td>
+    <td class="bg-yellow b-bottom b-left">&nbsp;</td>
+    <td colspan="8" class="b-left b-top b-right b-bottom">Área de Formación Básica</td>
+    <td>&nbsp;</td>
+    <td rowspan="2" class="b-left b-bottom">MAT 4160</td>
+    <td class="b-bottom b-left">HTI</td>
+    <td class="b-bottom b-left">HT</td>
+    <td class="b-bottom b-left">HP</td>
+    <td class="b-bottom b-left b-right">Cre</td>
+    <td colspan="35">&nbsp;</td>
+    </tr>
+    <tr>
+    <td>&nbsp;</td>
+    <td class="bg-red b-bottom b-left">&nbsp;</td>
+    <td colspan="8" class="b-left b-top b-right b-bottom">Área de Formación Básica Profesional</td>
+    <td>&nbsp;</td>
+    <td class="b-bottom b-left">4</td>
+    <td class="b-bottom b-left">4</td>
+    <td class="b-bottom b-left">0</td>
+    <td class="b-bottom b-left b-right">4</td>
+    <td colspan="35">&nbsp;</td>
+    </tr>
+    <tr>
+    <td>&nbsp;</td>
+    <td class="bg-blue b-bottom b-left">&nbsp;</td>
+    <td colspan="8" class="b-left b-top b-right b-bottom">Área de Formación Profesional</td>
+    <td>&nbsp;</td>
+    <td>HT</td>
+    <td colspan="4">Horas Teoricas</td>
+    <td colspan="35">&nbsp;</td>
+    </tr>
+    <!-- <tr>
+    <td>&nbsp;</td>
+    <td class="bg-orange b-bottom b-left">&nbsp;</td>
+    <td colspan="8" class="b-left b-top b-right b-bottom">Énfasis</td>
+    <td>&nbsp;</td>
+    <td colspan="2"></td>
+    <td colspan="2"></td>
+    <td colspan="35">&nbsp;</td>
+    </tr> -->
+    <tr>
+    <td>&nbsp;</td>
+    <td class="bg-ligthgreen b-bottom b-left">&nbsp;</td>
+    <td colspan="8" class="b-left b-top b-right b-bottom">Electiva</td>
+    <td>&nbsp;</td>
+    <td>HP</td>
+    <td colspan="4">Horas Practicas</td>
+    <td colspan="35">&nbsp;</td>
+    </tr>
+    <tr>
+    <td>&nbsp;</td>
+    <td class="bg-green b-bottom b-left">&nbsp;</td>
+    <td colspan="8" class="b-left b-top b-right b-bottom">Fundamentación</td>
+    <td>&nbsp;</td>
+    <td>HTI</td>
+    <td colspan="4">Horas Trabajo Independiente</td>
+    <td colspan="35">&nbsp;</td>
+    </tr>
+    <tr>
+    <td>&nbsp;</td>
+    <td class="bg-brown b-bottom b-left">&nbsp;</td>
+    <td colspan="8" class="b-left b-top b-right b-bottom">Formación Específica</td>
+    <td>&nbsp;</td>
+    <td colspan="2"></td>
+    <td colspan="3"></td>
+    <td colspan="35">&nbsp;</td>
+    </tr>
+    <tr>
+    <td>&nbsp;</td>
+    <td class="bg-purple b-bottom b-left">&nbsp;</td>
+    <td colspan="8" class="b-left b-top b-right b-bottom">Investigación</td>
+    <td>&nbsp;</td>
+    <td colspan="2">MAT 1120</td>
+    <td colspan="3">MAT 0020</td>
+    <td colspan="35">&nbsp;</td>
+    </tr>
+    <tr>
+    <td>&nbsp;</td>
+    <td class="bg-violet b-bottom b-left">&nbsp;</td>
+    <td colspan="8" class="b-left b-top b-right b-bottom">Idiomas</td>
+    <td>&nbsp;</td>
+    <td colspan="2" class="b-left b-top b-right b-bottom">Prerrequisito</td>
+    <td colspan="3" class="b-top b-right b-bottom">Correquisito</td>
+    <td colspan="35">&nbsp;</td>
+    </tr>
+    <tr>
+    <td colspan="50">&nbsp;</td>
+    </tr>
+    <tr class="align-left">
+    <td>&nbsp;</td>
+    <td colspan="4">TOTAL CREDITOS:</td>
+    <td>{{variables.totales.cre}}</td>
+    <td colspan="44">&nbsp;</td>
+    </tr>
+    <tr class="align-left">
+    <td>&nbsp;</td>
+    <td colspan="4">CREDITOS PL: </td>
+    <td>{{variables.totales.pl}}</td>
+    <td colspan="6">INDICE DE FLEXIBILIDAD: </td>
+    <td>&nbsp;</td>
+    <td>
+      {{ ((variables.totales.pl + variables.totales.p) / variables.totales.cre)|number_format(2, '.', ',') }}%
+    </td>
+    <td colspan="39">&nbsp;</td>
+    </tr>
+    <tr class="align-left">
+    <td>&nbsp;</td>
+    <td colspan="4">CREDITOS L: </td>
+    <td>{{variables.totales.l}}</td>
+    <td colspan="44">&nbsp;</td>
+    </tr>
+    <tr class="align-left">
+    <td>&nbsp;</td>
+    <td colspan="4">CREDITOS O: </td>
+    <td>{{variables.totales.o}}</td>
+    <td colspan="44">&nbsp;</td>
+    </tr>
+  </tbody>
+  </table>

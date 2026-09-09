@@ -1,0 +1,138 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Campos Contador Programas module.
+ */
+
+/**
+ * Implements hook_form_alter().
+ */
+function campos_contador_programas_form_alter(array &$form, $form_state, $form_id)
+{
+  if ($form_id == "node_informacion_institucional_edit_form") {
+    $form['field_cantidad_prog_acad']['#disabled'] = TRUE;
+    $form['field_total_acreditaciones_vigen']['#disabled'] = TRUE;
+    $form['field_cantidad_prog_acad_activos']['#disabled'] = TRUE;
+    $form['field_cantidad_prog_acad_funcion']['#disabled'] = TRUE;
+    $form['field_antidad_prog_acad_pregrado']['#disabled'] = TRUE;
+  }
+}
+
+/**
+ * Implement hook_entity_prepare_form
+ */
+function campos_contador_programas_entity_prepare_form($entity, $operation, $form_state) {
+  // Check Nodo
+  if ($entity->getEntityType()->id() != 'node') {
+    return;
+  }
+  // Check Nodo informacion_institucional
+  $type = $entity->getType();
+  if ($type != 'informacion_institucional' || $entity->id() != 2) {
+    return;
+  }
+  $fields = $entity->getFields();
+
+  $count = getCountProgramas();
+  $field_cantidad_prog_acad = $fields['field_cantidad_prog_acad'];
+  $field_cantidad_prog_acad->setValue($count);
+
+  $count = getCountAcreditacionesVigentes();
+  $field_total_acreditaciones_vigen = $fields['field_total_acreditaciones_vigen'];
+  $field_total_acreditaciones_vigen->setValue($count);
+
+  $count = getCountProgramasActivos();
+  $field_cantidad_prog_acad_activos = $fields['field_cantidad_prog_acad_activos'];
+  $field_cantidad_prog_acad_activos->setValue($count);
+
+  $count = getCountProgramasFuncionamiento();
+  $field_cantidad_prog_acad_funcion = $fields['field_cantidad_prog_acad_funcion'];
+  $field_cantidad_prog_acad_funcion->setValue($count);
+
+  $count = getCountProgramasPregrado();
+  $field_antidad_prog_acad_pregrado = $fields['field_antidad_prog_acad_pregrado'];
+  $field_antidad_prog_acad_pregrado->setValue($count);
+
+}
+
+/**
+ * Implement hook_entity_view
+ */
+function campos_contador_programas_entity_view($entity, $view_mode, $langcode)
+{
+  // Check entidad de tipo Nodo
+  if (!isset($entity['#entity_type']) || $entity['#entity_type'] != 'node') {
+    return;
+  }
+
+  // Check Nodo informacion_institucional
+  //dd($entity['#node']->id());
+  if (!isset($entity['#node']) || $entity['#node']->bundle() != 'informacion_institucional' || $entity['#node']->id() != 2) {
+    return;
+  }
+
+  $node = $entity['#node'];
+
+  if (isset($node->field_antidad_prog_acad_pregrado)) {
+    $count = getCountProgramasPregrado();
+    $node->field_antidad_prog_acad_pregrado[0]->setValue($count);
+  }
+  if (isset($node->field_cantidad_prog_acad_funcion)) {
+    $count = getCountProgramasFuncionamiento();
+    $node->field_cantidad_prog_acad_funcion[0]->setValue($count);
+  }
+  if (isset($node->field_cantidad_prog_acad_activos)) {
+    $count = getCountProgramasActivos();
+    $node->field_cantidad_prog_acad_activos[0]->setValue($count);
+  }
+  if (isset($node->field_total_acreditaciones_vigen)) {
+    $count = getCountAcreditacionesVigentes();
+    $node->field_total_acreditaciones_vigen[0]->setValue($count);
+  }
+  if (isset($node->field_cantidad_prog_acad)) {
+    $count = getCountProgramas();
+    $node->field_cantidad_prog_acad[0]->setValue($count);
+  }
+  $node->save();
+
+}
+
+
+function getCountProgramas(){
+  $query = \Drupal::entityQuery('node');
+  $query->condition('status', 1);
+  $query->condition('type', 'programas_academicos');
+  return $query->count()->execute();
+}
+function getCountProgramasActivos()
+{
+  $query = \Drupal::entityQuery('node');
+  $query->condition('status', 1);
+  $query->condition('type', 'programas_academicos');
+  $query->condition('field_activo', '1');
+  return $query->count()->execute();
+}
+function getCountProgramasFuncionamiento()
+{
+  $query = \Drupal::entityQuery('node');
+  $query->condition('status', 1);
+  $query->condition('type', 'programas_academicos');
+  $query->condition('field_en_funcionamiento', '1');
+  return $query->count()->execute();
+}
+function getCountProgramasPregrado()
+{
+  $query = \Drupal::entityQuery('node');
+  $query->condition('status', 1);
+  $query->condition('type', 'programas_academicos');
+  $query->condition('field_nivel_programa', '7664');
+  return $query->count()->execute();
+}
+function getCountAcreditacionesVigentes()
+{
+  $query = \Drupal::entityQuery('node');
+  $query->condition('status', 1);
+  $query->condition('type', 'acreditaciones_vigentes');
+  return $query->count()->execute();
+}

@@ -1,0 +1,123 @@
+<?php
+
+use Drupal\Core\Render\Markup;
+use Drupal\finalizar_actividades\Controller\FinalizarActividadController;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_alter().
+ */
+function finalizar_actividades_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  if ($form_id == 'node_actividades_procesos_edit_form') {
+    // Cargar librería JavaScript para formularios de actividades_procesos
+    $form['#attached']['library'][] = 'finalizar_actividades/validacion_actividades';
+    // Agregar la función de validación al formulario
+    $form['#validate'][] = 'validarCamposCorreoPersonalizado';
+  }
+}
+
+/**
+ * Valida los campos de correo personalizado.
+ */
+function validarCamposCorreoPersonalizado($form, FormStateInterface $form_state) {
+  // Obtener el valor del campo mail_sino
+  $mail_sino = $form_state->getValue('field_act_procesos_mail_sino');
+  if (!empty($mail_sino) && $mail_sino[0]['value'] == 'Sí, un correo personalizado') {
+    $errores = [];
+
+    // Validar campo de usuarios destinatarios
+    $mail_users = $form_state->getValue('field_act_procesos_mail_user');
+    if (empty($mail_users) || (isset($mail_users[0]['target_id']) && $mail_users[0]['target_id'] == '_none')) {
+      $errores[] = 'Falta diligenciar el campo Correo personalizado';
+      $form_state->setErrorByName('field_act_procesos_mail_user', 'Falta diligenciar el campo Correo personalizado');
+    }
+
+    // Validar campo de título del correo
+    $mail_titulo = $form_state->getValue('field_act_procesos_mail_titulo');
+    if (empty($mail_titulo) || empty($mail_titulo[0]['value']) || trim($mail_titulo[0]['value']) === '') {
+      $errores[] = 'Falta diligenciar el campo Asunto del correo personalizado';
+      $form_state->setErrorByName('field_act_procesos_mail_titulo', 'Falta diligenciar el campo Asunto del correo personalizado');
+    }
+
+    // Validar campo de contenido del correo
+    $mail_contenido = $form_state->getValue('field_act_procesos_contenidomail');
+    if (empty($mail_contenido) || empty($mail_contenido[0]['value']) || trim($mail_contenido[0]['value']) === '') {
+      $errores[] = 'Falta diligenciar el campo Contenido del correo personalizado';
+      $form_state->setErrorByName('field_act_procesos_contenidomail', 'Falta diligenciar el campo Contenido del correo personalizado');
+    }
+
+    // Si hay errores, mostrar mensajes
+    if (!empty($errores)) {
+      foreach ($errores as $error) {
+        \Drupal::messenger()->addError($error);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_mail().
+ */
+function finalizar_actividades_mail($key, &$message, $params) {
+  $options = array(
+    'langcode' => $message['langcode'],
+  );
+  switch ($key) {
+    case 'correo_finalizar_actividades':
+      $message['subject'] = t('@subject', array('@subject' => $params['subject']), $options);
+      $message['body'][] = Markup::create($params['message']);
+      break;
+  }
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function finalizar_actividades_menu_local_tasks_alter(&$data,$route_name,&$cacheability) {
+ $cacheability
+    ->addCacheContexts([
+    'user.permissions',
+    'url',
+  ]);
+  $route_match = \Drupal::routeMatch();
+  if (
+    $route_match->getRouteName() == 'entity.node.canonical' ||
+    $route_match->getRouteName() == 'entity.node.latest_version' ||
+    $route_match->getRouteName() == 'entity.node.edit_form'
+  ) {
+    $node = $route_match->getParameter('node');
+    if($node->bundle()=='actividades_procesos') {
+      $controller = new FinalizarActividadController;
+      $estado = $controller->getEstadoProceso($node);
+
+      switch ($estado) {
+
+        case $controller::SIN_INICIAR:
+          unset($data['tabs'][0]['finalizar_actividades.finalizar_actividad']);
+          break;
+
+        case $controller::PROCESO:
+          break;
+
+        case $controller::FINALIZADO:
+          unset($data['tabs'][0]['entity.node.edit_form']);
+          unset($data['tabs'][0]['entity.node.delete_form']);
+          unset($data['tabs'][0]['finalizar_actividades.finalizar_actividad']);
+          break;
+
+        case $controller::SIN_APROBACION:
+          unset($data['tabs'][0]['finalizar_actividades.finalizar_actividad']);
+          break;
+
+        case $controller::RECHAZADA:
+          unset($data['tabs'][0]['finalizar_actividades.finalizar_actividad']);
+          break;
+
+        default:
+          unset($data['tabs'][0]['finalizar_actividades.finalizar_actividad']);
+          break;
+
+      }
+    }
+  }
+}

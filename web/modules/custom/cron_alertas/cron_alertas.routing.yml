@@ -1,0 +1,13 @@
+cron_alertas.alertasEstandar:
+  path: '/cron_alertas_estandar'
+  defaults:
+    _controller: '\Drupal\cron_alertas\Controller\CronAlertasController::ejecutarAlertasEstandar'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+
+cron_alertas.alertasEspeciales:
+  path: '/cron_alertas_especiales'
+  defaults:
+    _controller: '\Drupal\cron_alertas\Controller\CronAlertasController::ejecutarAlertasEspeciales'
+  requirements:
+    _user_is_logged_in: 'TRUE'

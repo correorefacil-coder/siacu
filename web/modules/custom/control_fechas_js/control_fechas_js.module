@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for control_fechas_js module.
+ */
+
+/**
+ * Implements hook_page_attachments().
+ */
+function control_fechas_js_page_attachments(array &$attachments) {
+  $libraries = [
+    'control_fechas_js/control_fechas_js',
+  ];
+  foreach($libraries as $library) {
+    $attachments['#attached']['library'][] = $library;
+  }
+}

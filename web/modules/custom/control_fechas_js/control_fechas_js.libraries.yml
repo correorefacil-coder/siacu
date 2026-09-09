@@ -1,0 +1,10 @@
+# Custom module library for general purposes.
+control_fechas_js:
+  version: 1.4
+  js:
+    js/programas_academicos.js: {}
+    js/acreditacion_vigente.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/jquery.once

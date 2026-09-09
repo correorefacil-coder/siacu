@@ -1,0 +1,9 @@
+integracion_banner.confirmaEnviarProgramaBanner:
+  route_name: 'integracion_banner.confirmaEnviarProgramaBanner'
+  title: 'Guardar en Banner'
+  base_route: 'entity.node.canonical'
+  weight: 100
+  options:
+    attributes:
+      class:
+        - use-ajax

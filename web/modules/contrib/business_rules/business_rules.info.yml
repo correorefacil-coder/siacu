@@ -1,0 +1,15 @@
+name: Business Rules
+type: module
+description: Business Rules
+core_version_requirement: ^9 || ^10
+package: Workflow
+configure: entity.business_rule.collection
+dependencies:
+  - dbug:dbug
+test_dependencies:
+  - paragraphs:paragraphs
+
+# Information added by Drupal.org packaging script on 2024-01-26
+version: '3.0.0-beta1'
+project: 'business_rules'
+datestamp: 1706285593

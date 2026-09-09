@@ -1,0 +1,10 @@
+name: 'Allow All File Extensions for file fields'
+type: module
+description: 'A custom module which let user upload all file type extensions'
+core_version_requirement: ^8.8 || ^9.0 || ^10
+package: 'File Management'
+
+# Information added by Drupal.org packaging script on 2023-10-11
+version: '2.1.0'
+project: 'all_extensions'
+datestamp: 1697022344

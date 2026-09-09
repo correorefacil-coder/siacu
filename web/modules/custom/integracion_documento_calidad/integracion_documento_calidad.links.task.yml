@@ -1,0 +1,29 @@
+integracion_documento_calidad.finalizarDocumentoCalidadDrive:
+  route_name: 'integracion_documento_calidad.finalizarDocumentoCalidadDrive'
+  title: 'Finalizar'
+  base_route: 'entity.node.canonical'
+  weight: 100
+  options:
+    attributes:
+      class:
+        - use-ajax
+
+integracion_documento_calidad.reactivarDocumentoCalidadDrive:
+  route_name: 'integracion_documento_calidad.reactivarDocumentoCalidadDrive'
+  title: 'Reactivar'
+  base_route: 'entity.node.canonical'
+  weight: 100
+  options:
+    attributes:
+      class:
+        - use-ajax
+
+integracion_documento_calidad.descargarZIPDocumentoCalidadDrive:
+  route_name: 'integracion_documento_calidad.descargarZIPDocumentoCalidadDrive'
+  title: 'Descargar ZIP'
+  base_route: 'entity.node.canonical'
+  weight: 100
+  options:
+    attributes:
+      class:
+        - use-ajax

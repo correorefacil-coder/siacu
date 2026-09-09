@@ -1,0 +1,11 @@
+validacion_actividades:
+  version: 1.x
+  css:
+    theme:
+      css/validacion_actividades.css: {}
+  js:
+    js/validacion_actividades.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/jquery.once

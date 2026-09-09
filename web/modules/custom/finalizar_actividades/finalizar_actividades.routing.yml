@@ -1,0 +1,13 @@
+# Route for node extra settings tab.
+finalizar_actividades.finalizar_actividad:
+  path: '/node/{node}/finalizarActividad'
+  defaults:
+    _controller: '\Drupal\finalizar_actividades\Controller\FinalizarActividadController::finalizarActividad'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'actividades_procesos'

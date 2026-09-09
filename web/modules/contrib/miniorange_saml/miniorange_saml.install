@@ -1,0 +1,25 @@
+<?php
+/**
+ * @file
+ * Installation file for miniOrange SAML Module.
+ */
+
+use Drupal\miniorange_saml\Api\MoAuthApi;
+use Drupal\miniorange_saml\MiniorangeSAMLConstants;
+use Drupal\miniorange_saml\Utilities;
+
+/**
+ * Implements hook_install().
+ */
+function miniorange_saml_install() {
+  $timezone = date_default_timezone_get();
+  date_default_timezone_set($timezone);
+  $install_date = date('M j\, Y h:i:s A \(e\)');
+  $install_date = Utilities::drupal_is_cli() ? "[Command Line] " . $install_date : $install_date;
+  $editConfig = \Drupal::configFactory()->getEditable('miniorange_saml.settings');
+  $editConfig->set('miniorange_saml_nameid_format','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')->save();
+  $editConfig->set('miniorange_saml_feedback', '1')->save();
+  $editConfig->set('miniorange_saml_email_attribute', 'NameID')->save();
+  $editConfig->set('miniorange_saml_username_attribute', 'NameID')->save();
+  $editConfig->set('miniorange_saml_install_date',$install_date)->save();
+}

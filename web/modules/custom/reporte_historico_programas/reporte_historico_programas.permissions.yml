@@ -1,0 +1,4 @@
+administer reporte_historico_programas configuration:
+  title: 'Administer reporte_historico_programas configuration'
+  description: 'Optional description.'
+  restrict access: true

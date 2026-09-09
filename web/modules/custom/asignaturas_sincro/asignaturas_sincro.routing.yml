@@ -1,0 +1,33 @@
+asignaturas_sincro.sincronizarAsignaturasBanner:
+  path: '/asignaturas-sincro/banner'
+  defaults:
+    _title: 'Sincronizacion de Asignaturas Banner'
+    _controller: '\Drupal\asignaturas_sincro\Controller\AsignaturasSincroController::sincronizarAsignaturasBanner'
+  requirements:
+    _permission: 'access content,administer asignaturas_sincro configuration'
+
+asignaturas_sincro.confirmaEnviarAsignatura:
+  path: '/node/{node}/confirmaEnviarAsignaturaBanner'
+  defaults:
+    _controller: '\Drupal\asignaturas_sincro\Controller\AsignaturasSincroController::confirmaEnviarAsignaturaBanner'
+  requirements:
+    _permission: 'sincro asignaturas_sincro configuration'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'szvcata'
+
+asignaturas_sincro.enviarAsignaturaBanner:
+  path: '/node/{node}/enviarAsignaturaBanner'
+  defaults:
+    _controller: '\Drupal\asignaturas_sincro\Controller\AsignaturasSincroController::enviarAsignaturaBanner'
+  requirements:
+    _permission: 'access content,sincro asignaturas_sincro configuration'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        bundle:
+          - 'szvcata'

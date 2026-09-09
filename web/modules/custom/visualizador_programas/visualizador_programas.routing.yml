@@ -1,0 +1,15 @@
+visualizador_programas.visualizador:
+  path: '/visualizador-programas'
+  defaults:
+    _title: 'Avance y estado de los procesos abiertos de autoevaluación'
+    _controller: '\Drupal\visualizador_programas\Controller\VisualizadorProgramasController::build'
+  requirements:
+    _permission: 'access content'
+
+visualizador_programas.data:
+  path: '/visualizador-data'
+  defaults:
+    _title: 'Example'
+    _controller: '\Drupal\visualizador_programas\Controller\VisualizadorProgramasController::getData'
+  requirements:
+    _permission: 'access content'

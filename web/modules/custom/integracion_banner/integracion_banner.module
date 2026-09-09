@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function integracion_banner_menu_local_tasks_alter(&$data,$route_name,&$cacheability) {
+ $cacheability
+    ->addCacheContexts([
+    'user.permissions',
+    'url',
+  ]);
+  $route_match = \Drupal::routeMatch();
+  if (
+    $route_match->getRouteName() == 'entity.node.latest_version' ||
+    $route_match->getRouteName() == 'entity.node.edit_form'
+  ) {
+    $node = $route_match->getParameter('node');
+
+    if($node->bundle()=='programas_academicos') {
+      unset($data['tabs'][0]['integracion_banner.confirmaEnviarProgramaBanner']);
+    }
+  }
+}

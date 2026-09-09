@@ -1,0 +1,7 @@
+name: control_fechas_js
+type: module
+description: Controla rango de fechas de tipos de contenidos con Jquery
+package: Custom
+core_version_requirement: ^9 || ^10
+dependencies:
+  - node
