@@ -78,3 +78,29 @@ function activar_proceso_menu_local_tasks_alter(&$data,$route_name,&$cacheabilit
     }
   }
 }
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node_form.
+ */
+function activar_proceso_form_node_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $node = $form_state->getFormObject()->getEntity();
+  if ($node && $node->bundle() === 'procesos') {
+    // Visibilidad condicional para el correo de la actividad
+    if (isset($form['field_correo_actividad']) && isset($form['field_tipo_notif_actividad'])) {
+      $form['field_correo_actividad']['#states'] = [
+        'visible' => [
+          ':input[name="field_tipo_notif_actividad"]' => ['value' => 'personalizado'],
+        ],
+      ];
+    }
+    // Visibilidad condicional para el correo del proceso
+    if (isset($form['field_correo_proceso']) && isset($form['field_tipo_notif_proceso'])) {
+      $form['field_correo_proceso']['#states'] = [
+        'visible' => [
+          ':input[name="field_tipo_notif_proceso"]' => ['value' => 'personalizado'],
+        ],
+      ];
+    }
+  }
+}
+
