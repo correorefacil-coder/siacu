@@ -1,5 +1,9 @@
 <?php
 
+if (function_exists('opcache_reset')) {
+  @opcache_reset();
+}
+
 use Drupal\Core\Render\Markup;
 use Drupal\activar_proceso\Controller\ActivarProcesoController;
 
