@@ -61,8 +61,14 @@ function udn_clonar_actividades_entity_presave($entity){
   $actividadesClonadas = _clona_actividades_por_plantilla($plantillaEntity);
   $entity->field_proceso_actividades = $actividadesClonadas;
 
-  $field_plantilla_proceso_tipo = $plantillaEntity->field_plantilla_proceso_tipo[0]->getValue();
-  $plantilla_proceso_tipo = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($field_plantilla_proceso_tipo['target_id'])->getName();
+  $plantilla_proceso_tipo = '';
+  if ($plantillaEntity->hasField('field_plantilla_proceso_tipo') && !$plantillaEntity->field_plantilla_proceso_tipo->isEmpty()) {
+    $field_plantilla_proceso_tipo = $plantillaEntity->field_plantilla_proceso_tipo[0]->getValue();
+    $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($field_plantilla_proceso_tipo['target_id']);
+    if ($term) {
+      $plantilla_proceso_tipo = $term->getName();
+    }
+  }
 
   $procesos_pa_title = '';
   if (!$entity->field_procesos_pa->isEmpty()) {

@@ -260,7 +260,7 @@ class ConditionalFieldsFormHelper {
       $state = $this->getState($dependee, $dependee_form_field, $options);
 
       // Add validation callback to element if the dependency can be evaluated.
-      if (in_array($options['condition'], [
+      if (is_array($dependent_form_field) && in_array($options['condition'], [
         'value',
         'empty',
         '!empty',
