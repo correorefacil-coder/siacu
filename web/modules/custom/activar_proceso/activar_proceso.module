@@ -89,7 +89,9 @@ function activar_proceso_form_node_form_alter(&$form, \Drupal\Core\Form\FormStat
     if (isset($form['field_correo_actividad']) && isset($form['field_tipo_notif_actividad'])) {
       $form['field_correo_actividad']['#states'] = [
         'visible' => [
-          ':input[name="field_tipo_notif_actividad"]' => ['value' => 'personalizado'],
+          [':input[name="field_tipo_notif_actividad"]' => ['value' => 'personalizado']],
+          'or',
+          [':input[name="field_tipo_notif_actividad[value]"]' => ['value' => 'personalizado']],
         ],
       ];
     }
@@ -97,7 +99,9 @@ function activar_proceso_form_node_form_alter(&$form, \Drupal\Core\Form\FormStat
     if (isset($form['field_correo_proceso']) && isset($form['field_tipo_notif_proceso'])) {
       $form['field_correo_proceso']['#states'] = [
         'visible' => [
-          ':input[name="field_tipo_notif_proceso"]' => ['value' => 'personalizado'],
+          [':input[name="field_tipo_notif_proceso"]' => ['value' => 'personalizado']],
+          'or',
+          [':input[name="field_tipo_notif_proceso[value]"]' => ['value' => 'personalizado']],
         ],
       ];
     }
