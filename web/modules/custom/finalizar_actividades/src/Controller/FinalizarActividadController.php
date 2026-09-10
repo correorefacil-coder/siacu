@@ -116,38 +116,69 @@ class FinalizarActividadController extends ControllerBase {
         ';
         // Datos Responsable Proceso
         $proceso = $this->findProcesoByActividad($actividad);
-        $responsableProc = $proceso->field_proceso_responsable_academ->referencedEntities();
-        $responsableProc = reset($responsableProc);
-        $mailResponsableProc = $responsableProc->getEmail();
-        $variables['@mailResponsableProc'] = $responsableProc->getEmail();
-        $variables['@nombreResponsableProc'] = $this->getNombreUsuario($responsableProc);
-        $variables['@tituloProc'] = $proceso->getTitle();
-        $linkProc = $proceso->toLink(NULL, 'canonical', ['absolute' => true, 'https' => true]);
-        $variables['@linkProc'] = $linkProc->toString();
+        $mailResponsableProc = '';
+        $responsableProcObj = NULL;
+
+        if ($proceso && $proceso->hasField('field_proceso_responsable_academ') && !$proceso->field_proceso_responsable_academ->isEmpty()) {
+          $responsableProc = $proceso->field_proceso_responsable_academ->referencedEntities();
+          if (!empty($responsableProc)) {
+            $responsableProcObj = reset($responsableProc);
+            $mailResponsableProc = $responsableProcObj->getEmail();
+            $variables['@mailResponsableProc'] = $mailResponsableProc;
+            $variables['@nombreResponsableProc'] = $this->getNombreUsuario($responsableProcObj);
+          }
+        }
+        $variables['@tituloProc'] = $proceso ? $proceso->getTitle() : '';
+        if ($proceso) {
+          $linkProc = $proceso->toLink(NULL, 'canonical', ['absolute' => true, 'https' => true]);
+          $variables['@linkProc'] = $linkProc->toString();
+        } else {
+          $variables['@linkProc'] = '';
+        }
 
         // Datos Actividad
-        $responsableAcad = $actividad->field_act_procesos_responsable->referencedEntities();
-        $responsableAcad = reset($responsableAcad);
-        $mailResponsableAct = $responsableAcad->getEmail();
-        $variables['@mailResponsableAct'] = $responsableAcad->getEmail();
-        $nombreResponsableAct = $this->getNombreUsuario($responsableAcad);
-        $variables['@nombreResponsableAct'] = $this->getNombreUsuario($responsableAcad);
+        $mailResponsableAct = '';
+        $responsableAcadObj = NULL;
+        if ($actividad->hasField('field_act_procesos_responsable') && !$actividad->field_act_procesos_responsable->isEmpty()) {
+          $responsableAcad = $actividad->field_act_procesos_responsable->referencedEntities();
+          if (!empty($responsableAcad)) {
+            $responsableAcadObj = reset($responsableAcad);
+            $mailResponsableAct = $responsableAcadObj->getEmail();
+            $variables['@mailResponsableAct'] = $mailResponsableAct;
+            $variables['@nombreResponsableAct'] = $this->getNombreUsuario($responsableAcadObj);
+          }
+        }
+        if (!isset($variables['@mailResponsableAct'])) {
+          $variables['@mailResponsableAct'] = '';
+          $variables['@nombreResponsableAct'] = '';
+        }
+
         $observaciones = $actividad->field_act_procesos_observaciones->getValue();
         if (!empty($observaciones)) {
           $observaciones = reset($observaciones);
-          $variables['@observaciones'] = new formattablemarkup($observaciones['value'],[]);
+          $variables['@observaciones'] = new formattablemarkup($observaciones['value'], []);
         }
+
+        $variables['@fechaInicio'] = '';
         $fechaInicio = $actividad->field_act_procesos_fecha_inicio->getValue();
-        $fechaInicio = reset($fechaInicio);
-        $variables['@fechaInicio'] = $fechaInicio['value'];
+        if (!empty($fechaInicio)) {
+          $fechaInicio = reset($fechaInicio);
+          $variables['@fechaInicio'] = isset($fechaInicio['value']) ? $fechaInicio['value'] : '';
+        }
+
+        $variables['@fechaFinal'] = '';
         $fechaFinal = $actividad->field_act_procesos_fecha_final->getValue();
-        $fechaFinal = reset($fechaFinal);
-        $variables['@fechaFinal'] = $fechaFinal['value'];
+        if (!empty($fechaFinal)) {
+          $fechaFinal = reset($fechaFinal);
+          $variables['@fechaFinal'] = isset($fechaFinal['value']) ? $fechaFinal['value'] : '';
+        }
+
         $entradas = $actividad->field_act_procesos_entradas->getValue();
         if (!empty($entradas)) {
           $entradas = reset($entradas);
           $variables['@entradas'] = new formattablemarkup($entradas['value'], []);
         }
+
         $salidas = $actividad->field_act_procesos_salidad->getValue();
         if (!empty($salidas)) {
           $salidas = reset($salidas);
@@ -158,15 +189,16 @@ class FinalizarActividadController extends ControllerBase {
         $mailSend = '';
         if (filter_var($mailResponsableProc, FILTER_VALIDATE_EMAIL)) {
           $mailSend = $mailResponsableProc;
-        } else {
-          $message = t('Error al enviar correo de notificacion, el usuario @username no tiene correo electronico configurado.', array('@username' => $responsableProc->getAccountName()));
+        } elseif ($responsableProcObj) {
+          $message = t('Error al enviar correo de notificacion, el usuario @username no tiene correo electronico configurado.', array('@username' => $responsableProcObj->getAccountName()));
           \Drupal::messenger()->addError($message);
           \Drupal::logger('finalizar_Actividad')->error($message);
         }
+
         if (filter_var($mailResponsableAct, FILTER_VALIDATE_EMAIL)) {
-          $mailSend = $mailSend . ',' . $mailResponsableAct;
-        } else {
-          $message = t('Error al enviar correo de notificacion, el usuario @username no tiene correo electronico configurado.', array('@username' => $responsableAcad->getAccountName()));
+          $mailSend = !empty($mailSend) ? $mailSend . ',' . $mailResponsableAct : $mailResponsableAct;
+        } elseif ($responsableAcadObj) {
+          $message = t('Error al enviar correo de notificacion, el usuario @username no tiene correo electronico configurado.', array('@username' => $responsableAcadObj->getAccountName()));
           \Drupal::messenger()->addError($message);
           \Drupal::logger('finalizar_Actividad')->error($message);
         }
